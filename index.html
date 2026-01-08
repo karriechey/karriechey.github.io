@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karrie Chey | ML Engineer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #fafafa;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --accent: #2563eb;
+            --accent-dim: #3b82f6;
+            --border: #e5e5e5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated grain texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.01) 2px, rgba(0,0,0,.01) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,.01) 2px, rgba(0,0,0,.01) 4px);
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header */
+        header {
+            padding: 3rem 0 1rem;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 400;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 8rem 0 6rem;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 5rem;
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent) 0%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.8;
+            max-width: 600px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 0;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dim);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Projects Section */
+        .projects {
+            padding: 6rem 0;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .section-header {
+            margin-bottom: 4rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+        }
+
+        .project-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+        }
+
+        .project-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-dim);
+            box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+        }
+
+        .project-number {
+            font-family: 'Crimson Pro', serif;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            letter-spacing: 0.1em;
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .project-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tech-tag {
+            padding: 0.4rem 1rem;
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--accent);
+            font-size: 0.8rem;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            font-weight: 500;
+        }
+
+        .project-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .project-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .project-link:hover {
+            color: var(--accent);
+        }
+
+        .project-link::after {
+            content: '→';
+            transition: transform 0.3s ease;
+        }
+
+        .project-link:hover::after {
+            transform: translateX(4px);
+        }
+
+        /* Experience Section */
+        .experience {
+            padding: 6rem 0;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 1px;
+            background: linear-gradient(180deg, var(--accent) 0%, transparent 100%);
+        }
+
+        .timeline-item {
+            margin-bottom: 4rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -3.25rem;
+            top: 0.5rem;
+            width: 9px;
+            height: 9px;
+            background: var(--accent);
+            border: 2px solid var(--bg-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .timeline-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .timeline-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-company {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-description {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 6rem 0 4rem;
+            animation: fadeInUp 1s ease-out 0.8s both;
+        }
+
+        .contact-content {
+            max-width: 600px;
+        }
+
+        .contact-email {
+            font-size: 2rem;
+            color: var(--accent);
+            text-decoration: none;
+            display: inline-block;
+            margin: 2rem 0;
+            transition: transform 0.3s ease;
+        }
+
+        .contact-email:hover {
+            transform: translateX(10px);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .social-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-link:hover {
+            color: var(--accent);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            .nav-links {
+                gap: 1.5rem;
+            }
+
+            .project-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 4rem 0 3rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .timeline {
+                padding-left: 2rem;
+            }
+
+            .timeline-item::before {
+                left: -2.25rem;
+            }
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav>
+                <div class="logo">KC</div>
+                <ul class="nav-links">
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#experience">Experience</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Building <span class="gradient-text">intelligent systems</span> that bridge neuroscience and machine learning</h1>
+                <p class="hero-description">
+                    ML Engineer focused on neural applications and brain-computer interfaces. 
+                    Currently exploring the intersection of AI and neuroscience at DePaul University.
+                </p>
+                <div class="cta-buttons">
+                    <a href="#projects" class="btn btn-primary">View Projects</a>
+                    <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="projects">
+            <div class="section-header">
+                <h2 class="section-title">Selected Projects</h2>
+            </div>
+            <div class="project-grid">
+                <div class="project-card">
+                    <div class="project-number">01</div>
+                    <h3 class="project-title">ADHD Detection from fMRI Data</h3>
+                    <p class="project-description">
+                        Developed a machine learning pipeline to detect ADHD from functional brain imaging data, 
+                        achieving 82% accuracy through advanced feature extraction and neural network architectures.
+                    </p>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">TensorFlow</span>
+                        <span class="tech-tag">Scikit-learn</span>
+                        <span class="tech-tag">Neuroimaging</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/karriechey" class="project-link">View Code</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-number">02</div>
+                    <h3 class="project-title">Neurite Outgrowth Analysis</h3>
+                    <p class="project-description">
+                        Built an image classification tool for analyzing neurite growth patterns to verify 
+                        regenerative potential of candidate molecules in neurological research.
+                    </p>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Computer Vision</span>
+                        <span class="tech-tag">TensorFlow</span>
+                        <span class="tech-tag">Image Processing</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/karriechey" class="project-link">View Code</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-number">03</div>
+                    <h3 class="project-title">Gene Expression Classifier</h3>
+                    <p class="project-description">
+                        Adapted R Seurat-based supervised learning classifier to identify molecules with 
+                        regenerative genetic traits, supporting drug-based strategies for axon regeneration.
+                    </p>
+                    <div class="tech-stack">
+                        <span class="tech-tag">R</span>
+                        <span class="tech-tag">Machine Learning</span>
+                        <span class="tech-tag">Bioinformatics</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/karriechey" class="project-link">Learn More</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-number">04</div>
+                    <h3 class="project-title">Meteorite Catalog System</h3>
+                    <p class="project-description">
+                        Created an interactive web application using semi-supervised AI to digitize handwritten 
+                        meteorite records and organize metadata for improved lab accessibility.
+                    </p>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Web Development</span>
+                        <span class="tech-tag">OCR</span>
+                        <span class="tech-tag">Data Management</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/karriechey" class="project-link">View Demo</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience" class="experience">
+            <div class="section-header">
+                <h2 class="section-title">Experience</h2>
+            </div>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">AUG 2024 — DEC 2024</div>
+                    <h3 class="timeline-title">AI Intern</h3>
+                    <div class="timeline-company">UCLA Neurology HinmanLab</div>
+                    <p class="timeline-description">
+                        Investigated drug-based strategies to promote axon regeneration for patients with memory 
+                        impairments. Developed ML models using TensorFlow and scikit-learn to analyze neurological 
+                        data and support research outcomes.
+                    </p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">AUG 2024 — JUNE 2025</div>
+                    <h3 class="timeline-title">Research Assistant</h3>
+                    <div class="timeline-company">UCLA Earth, Planetary, and Space Science</div>
+                    <p class="timeline-description">
+                        Applied semi-supervised AI techniques to transcribe and digitize meteorite records. 
+                        Created interactive web applications to improve data accessibility for research teams.
+                    </p>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-date">MAY 2024 — JULY 2025</div>
+                    <h3 class="timeline-title">Machine Learning Student</h3>
+                    <div class="timeline-company">UCLA Break Through Tech AI</div>
+                    <p class="timeline-description">
+                        Completed comprehensive machine learning coursework and engineering pathway program, 
+                        building foundation in neural networks, data science, and AI applications.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact">
+            <div class="section-header">
+                <h2 class="section-title">Let's Connect</h2>
+            </div>
+            <div class="contact-content">
+                <p class="hero-description">
+                    I'm always interested in discussing machine learning, neuroscience applications, 
+                    or potential collaboration opportunities.
+                </p>
+                <a href="mailto:kchey@depaul.edu" class="contact-email">kchey@depaul.edu</a>
+                <div class="social-links">
+                    <a href="https://linkedin.com/in/karriechey" class="social-link">LinkedIn</a>
+                    <a href="https://github.com/karriechey" class="social-link">GitHub</a>
+                    <a href="https://youtube.com/@karriechey" class="social-link">YouTube</a>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2025 Karrie Chey. Designed & built with intention.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Smooth scroll offset for fixed headers
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add subtle parallax effect to hero
+        window.addEventListener('scroll', () => {
+            const hero = document.querySelector('.hero');
+            const scrolled = window.pageYOffset;
+            hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+            hero.style.opacity = 1 - (scrolled * 0.002);
+        });
+    </script>
+</body>
+</html>
