@@ -3,36 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karrie Chey | ML Engineer</title>
+    <title>Karrie Chey</title>
+    
+    <!-- Google Fonts: You can change these to any fonts from fonts.google.com -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <style>
+        /* 
+        ============================================
+        COLOR PALETTE - CHANGE THESE TO CUSTOMIZE COLORS!
+        ============================================
+        Here are some color options:
+        
+        TIFFANY BLUE (Elegant & Iconic):
+        --accent: #0abab5;
+        --accent-dim: #81d8d0;
+        
+        SAGE GREEN (Calm & Sophisticated):
+        --accent: #87a96b;
+        --accent-dim: #a8c69f;
+        
+        DUSTY ROSE (Feminine & Refined):
+        --accent: #c9ada7;
+        --accent-dim: #ddb6b0;
+        
+        BURGUNDY (Rich & Bold):
+        --accent: #800020;
+        --accent-dim: #a6192e;
+        
+        NAVY & GOLD (Classic):
+        --accent: #1e3a5f;
+        --accent-dim: #d4af37;
+        
+        FOREST GREEN (Natural & Elegant):
+        --accent: #2d5016;
+        --accent-dim: #4a7c2c;
+        
+        Just copy the two lines paste them below!
+        */
+        
         :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #fafafa;
-            --text-primary: #1a1a1a;
-            --text-secondary: #666666;
-            --accent: #2563eb;
-            --accent-dim: #3b82f6;
-            --border: #e5e5e5;
+            /* Background colors */
+            --bg-primary: #ffffff;        /* Main background - pure white */
+            --bg-secondary: #fafafa;      /* Card backgrounds - slightly off-white */
+            
+            /* Text colors */
+            --text-primary: #1a1a1a;      /* Main text - almost black */
+            --text-secondary: #666666;    /* Secondary text - gray */
+            
+            /* Accent colors - CHANGE THESE FOR YOUR UNIQUE COLOR! */
+            --accent: #0abab5;            /* Main accent color - currently Tiffany Blue */
+            --accent-dim: #81d8d0;        /* Lighter version of accent */
+            
+            /* Border color */
+            --border: #e5e5e5;            /* Light gray borders */
         }
 
+        /* Reset default browser styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        /* 
+        ============================================
+        BODY & BASE STYLES
+        ============================================
+        */
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'DM Sans', sans-serif;  /* Main font for body text */
             background-color: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
-            overflow-x: hidden;
+            overflow-x: hidden;  /* Prevent horizontal scroll */
         }
 
-        /* Animated grain texture overlay */
+        /* Subtle texture overlay - adds depth to the background */
         body::before {
             content: '';
             position: fixed;
@@ -43,55 +92,64 @@
             background-image: 
                 repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.01) 2px, rgba(0,0,0,.01) 4px),
                 repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,.01) 2px, rgba(0,0,0,.01) 4px);
-            pointer-events: none;
+            pointer-events: none;  /* Allow clicking through the overlay */
             z-index: 1;
             opacity: 0.5;
         }
 
+        /* Container keeps content centered and padded */
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
+            max-width: 1200px;  /* Maximum width of content */
+            margin: 0 auto;     /* Center the container */
+            padding: 0 2rem;    /* Side padding */
             position: relative;
-            z-index: 2;
+            z-index: 2;         /* Above the texture overlay */
         }
 
-        /* Header */
+        /* 
+        ============================================
+        HEADER & NAVIGATION
+        ============================================
+        */
         header {
             padding: 3rem 0 1rem;
-            animation: slideDown 0.8s ease-out;
+            animation: slideDown 0.8s ease-out;  /* Animated entrance */
         }
 
         nav {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between;  /* Logo left, links right */
             align-items: center;
             padding-bottom: 2rem;
             border-bottom: 1px solid var(--border);
         }
 
+        /* Your logo/initials in the top left */
         .logo {
-            font-family: 'Crimson Pro', serif;
+            font-family: 'Crimson Pro', serif;  /* Elegant serif font */
             font-size: 1.5rem;
             font-weight: 300;
             letter-spacing: 0.05em;
         }
 
+        /* Navigation links container */
         .nav-links {
             display: flex;
-            gap: 2.5rem;
-            list-style: none;
+            gap: 2.5rem;        /* Space between links */
+            list-style: none;   /* Remove bullet points */
         }
 
+        /* Individual navigation link styling */
         .nav-links a {
             color: var(--text-secondary);
-            text-decoration: none;
+            text-decoration: none;  /* Remove underline */
             font-size: 0.95rem;
             font-weight: 400;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease;  /* Smooth color change on hover */
             position: relative;
         }
 
+        /* Animated underline effect on hover */
         .nav-links a::after {
             content: '';
             position: absolute;
@@ -99,7 +157,7 @@
             left: 0;
             width: 0;
             height: 1px;
-            background: var(--accent);
+            background: var(--accent);  /* Uses your accent color */
             transition: width 0.3s ease;
         }
 
@@ -108,21 +166,62 @@
         }
 
         .nav-links a:hover::after {
-            width: 100%;
+            width: 100%;  /* Underline grows to full width */
         }
 
-        /* Hero Section */
+        /* 
+        ============================================
+        HERO SECTION (Top of page)
+        ============================================
+        TO ADD YOUR PHOTO:
+        1. Save your photo in the same folder as index.html
+        2. Name it something like "profile.jpg"
+        3. Uncomment the .hero-with-photo section below
+        4. Update the background-image URL with your photo name
+        */
         .hero {
             padding: 8rem 0 6rem;
             animation: fadeInUp 1s ease-out 0.2s both;
         }
 
+        /* 
+        OPTIONAL: Hero section with background photo
+        Uncomment this section (remove the comment marks) to add a photo:
+        
+        .hero-with-photo {
+            background-image: url('your-photo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+            padding: 10rem 3rem;
+            position: relative;
+        }
+        
+        .hero-with-photo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+        }
+        
+        .hero-with-photo .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        */
+
         .hero-content {
             max-width: 800px;
         }
 
+        /* Main headline - the big text at the top */
         h1 {
-            font-family: 'Crimson Pro', serif;
+            font-family: 'Crimson Pro', serif;  /* Elegant serif for headlines */
             font-size: 5rem;
             font-weight: 300;
             line-height: 1.1;
@@ -130,13 +229,15 @@
             letter-spacing: -0.02em;
         }
 
+        /* Gradient text effect - makes text colorful! */
         .gradient-text {
-            background: linear-gradient(135deg, var(--accent) 0%, #60a5fa 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
+        /* Description text under the headline */
         .hero-description {
             font-size: 1.25rem;
             color: var(--text-secondary);
@@ -145,22 +246,25 @@
             max-width: 600px;
         }
 
+        /* Buttons container */
         .cta-buttons {
             display: flex;
             gap: 1.5rem;
         }
 
+        /* Base button styling */
         .btn {
             padding: 1rem 2.5rem;
             font-size: 1rem;
             font-weight: 500;
             text-decoration: none;
-            border-radius: 0;
+            border-radius: 0;  /* Sharp corners for modern look */
             transition: all 0.3s ease;
             border: 1px solid var(--border);
             display: inline-block;
         }
 
+        /* Primary button (colored background) */
         .btn-primary {
             background: var(--accent);
             color: #ffffff;
@@ -170,9 +274,10 @@
         .btn-primary:hover {
             background: var(--accent-dim);
             color: #ffffff;
-            transform: translateY(-2px);
+            transform: translateY(-2px);  /* Lift up slightly on hover */
         }
 
+        /* Secondary button (outlined) */
         .btn-secondary {
             background: transparent;
             color: var(--text-primary);
@@ -183,7 +288,18 @@
             transform: translateY(-2px);
         }
 
-        /* Projects Section */
+        /* 
+        ============================================
+        PROJECTS SECTION
+        ============================================
+        TO ADD PROJECT IMAGES:
+        1. Save your project images in an "images" folder
+        2. Add this CSS to the project-card:
+           background-image: url('images/project1.jpg');
+           background-size: cover;
+           background-position: center;
+        3. Or add an <img> tag inside the project-card div
+        */
         .projects {
             padding: 6rem 0;
             animation: fadeInUp 1s ease-out 0.4s both;
@@ -202,12 +318,14 @@
             letter-spacing: -0.01em;
         }
 
+        /* Grid layout for projects - automatically adjusts columns */
         .project-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 3rem;
         }
 
+        /* Individual project card */
         .project-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
@@ -217,6 +335,36 @@
             overflow: hidden;
         }
 
+        /* 
+        OPTION: Add an image to the top of each project card
+        Add this inside each .project-card div in the HTML:
+        
+        <div class="project-image">
+            <img src="images/your-project-image.jpg" alt="Project description">
+        </div>
+        
+        Then add this CSS:
+        */
+        .project-image {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;  /* Crops image to fill space nicely */
+            transition: transform 0.4s ease;
+        }
+
+        .project-card:hover .project-image img {
+            transform: scale(1.05);  /* Slight zoom on hover */
+        }
+
+        /* Animated line that appears on hover */
         .project-card::before {
             content: '';
             position: absolute;
@@ -233,10 +381,11 @@
             transform: translateX(0);
         }
 
+        /* Hover effect - card lifts up with shadow */
         .project-card:hover {
             transform: translateY(-8px);
             border-color: var(--accent-dim);
-            box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 20px 40px rgba(10, 186, 181, 0.15);  /* Shadow uses your accent color */
         }
 
         .project-number {
@@ -261,19 +410,20 @@
             line-height: 1.7;
         }
 
+        /* Technology tags (Python, TensorFlow, etc.) */
         .tech-stack {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: wrap;  /* Wrap to next line if needed */
             gap: 0.75rem;
             margin-bottom: 1.5rem;
         }
 
         .tech-tag {
             padding: 0.4rem 1rem;
-            background: rgba(37, 99, 235, 0.08);
+            background: rgba(10, 186, 181, 0.08);  /* Light version of accent color */
             color: var(--accent);
             font-size: 0.8rem;
-            border: 1px solid rgba(37, 99, 235, 0.2);
+            border: 1px solid rgba(10, 186, 181, 0.2);
             font-weight: 500;
         }
 
@@ -296,16 +446,21 @@
             color: var(--accent);
         }
 
+        /* Animated arrow on links */
         .project-link::after {
             content: '→';
             transition: transform 0.3s ease;
         }
 
         .project-link:hover::after {
-            transform: translateX(4px);
+            transform: translateX(4px);  /* Arrow slides right on hover */
         }
 
-        /* Experience Section */
+        /* 
+        ============================================
+        EXPERIENCE SECTION (Timeline)
+        ============================================
+        */
         .experience {
             padding: 6rem 0;
             animation: fadeInUp 1s ease-out 0.6s both;
@@ -316,6 +471,7 @@
             padding-left: 3rem;
         }
 
+        /* Vertical line down the left side */
         .timeline::before {
             content: '';
             position: absolute;
@@ -331,6 +487,7 @@
             position: relative;
         }
 
+        /* Dot on the timeline */
         .timeline-item::before {
             content: '';
             position: absolute;
@@ -341,7 +498,7 @@
             background: var(--accent);
             border: 2px solid var(--bg-primary);
             border-radius: 50%;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 3px rgba(10, 186, 181, 0.1);
         }
 
         .timeline-date {
@@ -368,7 +525,11 @@
             line-height: 1.8;
         }
 
-        /* Contact Section */
+        /* 
+        ============================================
+        CONTACT SECTION
+        ============================================
+        */
         .contact {
             padding: 6rem 0 4rem;
             animation: fadeInUp 1s ease-out 0.8s both;
@@ -388,7 +549,7 @@
         }
 
         .contact-email:hover {
-            transform: translateX(10px);
+            transform: translateX(10px);  /* Slides right on hover */
         }
 
         .social-links {
@@ -408,7 +569,11 @@
             color: var(--accent);
         }
 
-        /* Footer */
+        /* 
+        ============================================
+        FOOTER
+        ============================================
+        */
         footer {
             padding: 3rem 0;
             border-top: 1px solid var(--border);
@@ -418,7 +583,12 @@
             font-size: 0.9rem;
         }
 
-        /* Animations */
+        /* 
+        ============================================
+        ANIMATIONS
+        ============================================
+        These create the smooth entrance effects
+        */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -441,10 +611,14 @@
             }
         }
 
-        /* Responsive */
+        /* 
+        ============================================
+        RESPONSIVE DESIGN (Mobile phones & tablets)
+        ============================================
+        */
         @media (max-width: 768px) {
             h1 {
-                font-size: 3rem;
+                font-size: 3rem;  /* Smaller headline on mobile */
             }
 
             .nav-links {
@@ -452,7 +626,7 @@
             }
 
             .project-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr;  /* Single column on mobile */
             }
 
             .hero {
@@ -460,7 +634,7 @@
             }
 
             .cta-buttons {
-                flex-direction: column;
+                flex-direction: column;  /* Stack buttons vertically */
             }
 
             .timeline {
@@ -472,7 +646,7 @@
             }
         }
 
-        /* Smooth scroll */
+        /* Smooth scrolling when clicking nav links */
         html {
             scroll-behavior: smooth;
         }
@@ -480,71 +654,141 @@
 </head>
 <body>
     <div class="container">
+        <!-- 
+        ============================================
+        HEADER SECTION
+        ============================================
+        Change "KC" to your initials or name
+        Update the navigation links as needed
+        -->
         <header>
             <nav>
-                <div class="logo">KC</div>
+                <div class="logo">Karrie Chey</div>
                 <ul class="nav-links">
                     <li><a href="#projects">Projects</a></li>
                     <li><a href="#experience">Experience</a></li>
                     <li><a href="#contact">Contact</a></li>
+                    <!-- To add more nav links, copy a <li> line and paste below -->
                 </ul>
             </nav>
         </header>
 
+        <!-- 
+        ============================================
+        HERO SECTION
+        ============================================
+        This is the first thing visitors see!
+        Edit the headline and description to match your style
+        -->
         <section class="hero">
             <div class="hero-content">
-                <h1>Building <span class="gradient-text">intelligent systems</span> that bridge neuroscience and machine learning</h1>
-                <p class="hero-description">
-                    ML Engineer focused on neural applications and brain-computer interfaces. 
-                    Currently exploring the intersection of AI and neuroscience at DePaul University.
-                </p>
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 20rem; align-items: start; margin-bottom: 1rem;">
+                    <h1 style="margin: 0;">Exploring <span class="gradient-text">intelligent systems</span> at the intersection of neuroscience and AI</h1>
+                    
+                    <!-- Profile Photo -->
+                    <img src="IMG_2831.jpeg" alt="Karrie Chey" 
+                         style="width: 350px; height: aut0; 
+                                border:0px solid var(--accent);
+                                box-shadow: 0 8px 15=6px rgba(0, 0, 0, 0.2);
+                                object-fit: cover;">
+                </div>
+                
+                <div class="hero-description">    
+                    <p>
+                        I explore the intersection of human cognition and artificial intelligence.
+                        I'm fascinated by how brains—both biological and artificial—learn, adapt, and create.
+                    </p>
+                    
+                    <p>
+                        I think about questions like: What are we made of? What happened before the Big Bang? 
+                        Are we living in a simulation? These questions drive my curiosity and shape how I 
+                        approach machine learning and neuroscience.
+                    </p>
+                    
+                    <p>
+                        When I'm not coding or researching, I love watching open course lectures, playing cello 
+                        in a symphony orchestra, swimming and surfing in the ocean, or skiing down the mountains.
+                    </p>
+                    
+                    <p>
+                        My goal is simple: contribute to neurotechnology that helps people, while continuously 
+                        expanding what I understand about intelligence—artificial and otherwise.
+                    </p>
+                </div>
+                
                 <div class="cta-buttons">
                     <a href="#projects" class="btn btn-primary">View Projects</a>
                     <a href="#contact" class="btn btn-secondary">Get in Touch</a>
                 </div>
             </div>
         </section>
-
+        <!-- 
+        ============================================
+        PROJECTS SECTION
+        ============================================
+        Showcase your best work here!
+        To add a new project, copy one entire <div class="project-card">...</div>
+        and paste it below the others
+        -->
         <section id="projects" class="projects">
             <div class="section-header">
-                <h2 class="section-title">Selected Projects</h2>
+                <h2 class="section-title">Machine Learning Projects</h2>
             </div>
             <div class="project-grid">
+                
+                <!-- PROJECT 1 -->
                 <div class="project-card">
+                    <!-- 
+                    TO ADD A PROJECT IMAGE:
+                    Add this line right after the opening project-card div:
+                    
+                    <div class="project-image">
+                        <img src="images/adhd-project.jpg" alt="ADHD Detection Project">
+                    </div>
+                    -->
+                    
                     <div class="project-number">01</div>
                     <h3 class="project-title">ADHD Detection from fMRI Data</h3>
                     <p class="project-description">
                         Developed a machine learning pipeline to detect ADHD from functional brain imaging data, 
                         achieving 82% accuracy through advanced feature extraction and neural network architectures.
                     </p>
+                    
+                    <!-- Technology tags - add or remove as needed -->
                     <div class="tech-stack">
                         <span class="tech-tag">Python</span>
                         <span class="tech-tag">TensorFlow</span>
                         <span class="tech-tag">Scikit-learn</span>
                         <span class="tech-tag">Neuroimaging</span>
                     </div>
+                    
                     <div class="project-links">
-                        <a href="https://github.com/karriechey" class="project-link">View Code</a>
+                        <!-- Update these links to your actual project URLs -->
+                        <a href="https://github.com/karriechey" class="project-link">View Project</a>
+                        <!-- To add more links, copy the line above and change the text/URL -->
                     </div>
                 </div>
 
+                <!-- PROJECT 2 -->
                 <div class="project-card">
-                    <div class="project-number">02</div>
-                    <h3 class="project-title">Neurite Outgrowth Analysis</h3>
+                    <div class="project-number">05</div>
+                    <h3 class="project-title">Quantum Noise Classification</h3>
                     <p class="project-description">
-                        Built an image classification tool for analyzing neurite growth patterns to verify 
-                        regenerative potential of candidate molecules in neurological research.
+                        Developed machine learning models to classify quantum measurement noise (depolarizing, amplitude damping, phase damping) from simulated 
+                        circuits, achieving 82.33% accuracy through distribution-based feature engineering. 
                     </p>
                     <div class="tech-stack">
-                        <span class="tech-tag">Computer Vision</span>
-                        <span class="tech-tag">TensorFlow</span>
-                        <span class="tech-tag">Image Processing</span>
+                        <span class="tech-tag">Qiskit</span>
+                        <span class="tech-tag">XGBoost</span>
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Machine Learning</span>
                     </div>
                     <div class="project-links">
-                        <a href="https://github.com/karriechey" class="project-link">View Code</a>
+                        <a href="https://github.com/karriechey/quantum-noise-classifier.git" class="project-link">View Project</a>
                     </div>
                 </div>
 
+                <!-- PROJECT 3 -->
                 <div class="project-card">
                     <div class="project-number">03</div>
                     <h3 class="project-title">Gene Expression Classifier</h3>
@@ -558,10 +802,11 @@
                         <span class="tech-tag">Bioinformatics</span>
                     </div>
                     <div class="project-links">
-                        <a href="https://github.com/karriechey" class="project-link">Learn More</a>
+                        <a href="https://github.com/ucla-neurology/axon-regeneration-classifier.git" class="project-link">View Project</a>
                     </div>
                 </div>
 
+                <!-- PROJECT 4 -->
                 <div class="project-card">
                     <div class="project-number">04</div>
                     <h3 class="project-title">Meteorite Catalog System</h3>
@@ -575,17 +820,34 @@
                         <span class="tech-tag">Data Management</span>
                     </div>
                     <div class="project-links">
-                        <a href="https://github.com/karriechey" class="project-link">View Demo</a>
+                        <a href="https://karriechey.github.io/DeyerleNotebook/" class="project-link">View Demo</a>
                     </div>
                 </div>
+
+                
+                
+                <!-- 
+                TO ADD ANOTHER PROJECT:
+                Copy from <div class="project-card"> to its closing </div>
+                and paste here, then update the content
+                -->
+                
             </div>
         </section>
 
+        <!-- 
+        ============================================
+        EXPERIENCE SECTION
+        ============================================
+        Your work history in timeline format
+        -->
         <section id="experience" class="experience">
             <div class="section-header">
                 <h2 class="section-title">Experience</h2>
             </div>
             <div class="timeline">
+                
+                <!-- EXPERIENCE 1 -->
                 <div class="timeline-item">
                     <div class="timeline-date">AUG 2024 — DEC 2024</div>
                     <h3 class="timeline-title">AI Intern</h3>
@@ -597,6 +859,7 @@
                     </p>
                 </div>
 
+                <!-- EXPERIENCE 2 -->
                 <div class="timeline-item">
                     <div class="timeline-date">AUG 2024 — JUNE 2025</div>
                     <h3 class="timeline-title">Research Assistant</h3>
@@ -607,43 +870,69 @@
                     </p>
                 </div>
 
+                <!-- EXPERIENCE 3 -->
                 <div class="timeline-item">
                     <div class="timeline-date">MAY 2024 — JULY 2025</div>
-                    <h3 class="timeline-title">Machine Learning Student</h3>
-                    <div class="timeline-company">UCLA Break Through Tech AI</div>
+                    <h3 class="timeline-title">AI/ML Fellow</h3>
+                    <div class="timeline-company">Break Through Tech AI @UCLA</div>
                     <p class="timeline-description">
-                        Completed comprehensive machine learning coursework and engineering pathway program, 
-                        building foundation in neural networks, data science, and AI applications.
+                        Completed year-long AI fellowship including machine learning fundamentals, data science 
+                        techniques, and collaborative industry challenge project. Worked with mentor Aditya Jadhav 
+                        to develop professional skills.
                     </p>
                 </div>
+                
+                <!-- To add more experience, copy a timeline-item div and paste here -->
+                
             </div>
         </section>
 
+        <!-- 
+        ============================================
+        CONTACT SECTION
+        ============================================
+        How people can reach you
+        -->
         <section id="contact" class="contact">
             <div class="section-header">
                 <h2 class="section-title">Let's Connect</h2>
             </div>
             <div class="contact-content">
                 <p class="hero-description">
-                    I'm always interested in discussing machine learning, neuroscience applications, 
-                    or potential collaboration opportunities.
+                    I'm always interested in discussing potential collaboration opportunities.
                 </p>
-                <a href="mailto:kchey@depaul.edu" class="contact-email">kchey@depaul.edu</a>
+                <!-- Update with your email -->
+                <a href="mailto:karriechey@gameil.edu" class="contact-email">karriechey@gmail.com</a>
+                
+                <!-- Update these links with your actual social media profiles -->
                 <div class="social-links">
                     <a href="https://linkedin.com/in/karriechey" class="social-link">LinkedIn</a>
                     <a href="https://github.com/karriechey" class="social-link">GitHub</a>
-                    <a href="https://youtube.com/@karriechey" class="social-link">YouTube</a>
+                    <a href="https://www.youtube.com/@Justawoodsawyer" class="social-link">YouTube</a>
+                    <a href="https://www.instagram.com/karrie.cc/?hl=en" class="social-link">Instagram</a>
+                    <!-- To add more social links, copy a line and paste here -->
                 </div>
             </div>
         </section>
 
+        <!-- 
+        ============================================
+        FOOTER
+        ============================================
+        -->
         <footer>
             <p>© 2025 Karrie Chey. Designed & built with intention.</p>
         </footer>
     </div>
 
+    <!-- 
+    ============================================
+    JAVASCRIPT FOR INTERACTIVITY
+    ============================================
+    This code adds smooth scrolling and parallax effects
+    -->
     <script>
-        // Smooth scroll offset for fixed headers
+        // Smooth scroll to sections when clicking navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -657,7 +946,7 @@
             });
         });
 
-        // Add subtle parallax effect to hero
+        // Parallax effect on hero section (moves slower as you scroll)
         window.addEventListener('scroll', () => {
             const hero = document.querySelector('.hero');
             const scrolled = window.pageYOffset;
