@@ -1,0 +1,14 @@
+<!--
+  Favicon: a 2x2 checkerboard of rounded squares in the two accent colours —
+  the smallest possible surface code plaquette. Violet is the X-type
+  stabilizer, teal is the Z-type, matching the lattice on the home page.
+
+  Created:      2026-07-26
+  Last updated: 2026-07-26
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Surface code plaquette">
+  <rect x="2"  y="2"  width="13" height="13" rx="3" fill="#6B4EE6"/>
+  <rect x="17" y="2"  width="13" height="13" rx="3" fill="#0F7D70"/>
+  <rect x="2"  y="17" width="13" height="13" rx="3" fill="#0F7D70"/>
+  <rect x="17" y="17" width="13" height="13" rx="3" fill="#6B4EE6"/>
+</svg>

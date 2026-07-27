@@ -1,0 +1,7 @@
+<!-- PLACEHOLDER IMAGE. Replace this file with the real figure. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-label="Placeholder">
+  <rect width="800" height="500" fill="#F7F8FA"/>
+  <rect x="0.5" y="0.5" width="799" height="499" fill="none" stroke="#DDE1EA"/>
+  <text x="400" y="240" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="18" fill="#8B93A8">placeholder</text>
+  <text x="400" y="266" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#8B93A8">work/meteorite-notebooks.svg</text>
+</svg>

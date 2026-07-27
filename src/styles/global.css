@@ -1,0 +1,783 @@
+/*
+ * Global stylesheet. Every visual decision on the site is derived from the
+ * custom properties defined in this file — there are no hard-coded colours
+ * anywhere else in the codebase.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * Design intent, so future edits do not drift:
+ *   - Two accents only. Violet is the X-type stabilizer colour and doubles as
+ *     the primary interactive accent (links, focus). Teal is the Z-type
+ *     stabilizer colour and doubles as the secondary accent. There is
+ *     deliberately no third accent — do not add one.
+ *   - Restraint. No gradients, no drop shadows, no scroll animation. Hairline
+ *     rules and whitespace carry the layout.
+ *   - Dark mode follows the system preference only. There is no toggle, so
+ *     there is no state to persist and no flash-of-wrong-theme to guard.
+ */
+
+/* ==========================================================================
+   1. Tokens
+   ========================================================================== */
+
+:root {
+  /* --- Surfaces and ink ------------------------------------------------- */
+  --paper: #f7f8fa;      /* page background */
+  --raised: #ffffff;     /* cards, code surfaces, anything sitting on paper */
+  --ink: #14192b;        /* body text and headings */
+  --ink-soft: #5a6480;   /* secondary prose, captions, summaries */
+  --ink-faint: #8b93a8;  /* dates, metadata, disabled states */
+  --rule: #dde1ea;       /* every border on the site is this colour, 1px */
+
+  /* --- Accents: the two stabilizer types -------------------------------- */
+  --x-check: #6b4ee6;    /* X-type stabilizer + primary interactive accent */
+  --x-wash: #efecfd;     /* X-check fill when fired; tinted backgrounds */
+  --z-check: #0f7d70;    /* Z-type stabilizer + secondary accent */
+  --z-wash: #e4f2f0;     /* Z-check fill when fired */
+
+  /* --- Type ------------------------------------------------------------- */
+  /*
+    Two typefaces, not three. Newsreader does both headings and body: a heading
+    differs from a sentence by size and weight alone, never by voice. Mono is
+    reserved for things that are not sentences — dates, tags, counts, code.
+
+    `--font-display` is kept as a separate token even though it currently
+    resolves to the same stack as `--font-body`, so a future change to headings
+    is one line rather than a search through every component.
+  */
+  --font-display: 'Newsreader', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-body: 'Newsreader', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* --- Measure and rhythm ----------------------------------------------- */
+  /* 68ch is the comfortable reading measure required for the long guide
+     documents. Prose is never allowed to run the full page width. */
+  --measure: 68ch;
+
+  /*
+    The page fills the window. `--page-max: none` means the header rule, the
+    footer rule and every section span edge to edge rather than sitting in a
+    centred column with empty margins either side.
+
+    Two things are deliberately NOT full width, and should stay that way:
+      - Body prose, which is capped at --measure (about 68 characters). Line
+        length is the single biggest factor in whether a long document is
+        readable; a 200-character line is unreadable no matter how much room
+        the window has.
+      - The portrait on the home page, which has its own max-width.
+
+    To go back to a centred column, set this to a length such as 72rem.
+  */
+  --page-max: none;
+
+  /* Breathing room at the window edges. Scales with viewport so a wide screen
+     gets a wider margin than a phone, without a media query. */
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+
+  /* A four-step spacing scale. Anything needing an in-between value is
+     probably a layout mistake. */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 2rem;
+  --space-4: 4rem;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0f1320;
+    --raised: #171c2d;
+    --ink: #e8eaf2;
+    --ink-soft: #9aa3bd;
+    --ink-faint: #6d7591;
+    --rule: #2a3145;
+
+    --x-check: #a08ffc;
+    --x-wash: #221d3d;
+    --z-check: #4fc4b2;
+    --z-wash: #10312c;
+
+    color-scheme: dark;
+  }
+}
+
+/* ==========================================================================
+   2. Reset and base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Anchor links land below the sticky-ish header rather than flush against
+     the viewport edge. Applies to every in-page heading jump in the guides. */
+  scroll-padding-top: var(--space-3);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  /* Newsreader is a text serif; 1.125rem/1.65 is where it stops feeling
+     cramped at long lengths. */
+  font-size: 1.125rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Skip link: visually hidden until focused, then pinned top-left. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: var(--space-1) var(--space-2);
+  background: var(--raised);
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.skip-link:focus {
+  left: var(--space-2);
+  top: var(--space-2);
+}
+
+/* --- Headings ---------------------------------------------------------- */
+/* Sentence case everywhere. No title case, no all-caps outside the small
+   mono eyebrow labels below. */
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  /* 500 rather than bold. A serif at 600+ reads as emphasis; the size already
+     establishes the hierarchy, so weight only has to nudge it. */
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0 0 var(--space-2);
+  /* Serifs set at display sizes need slightly tighter tracking than at
+     reading sizes, or the letters drift apart. */
+  letter-spacing: -0.015em;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 1.4rem + 2.2vw, 3rem);
+  /* Newsreader has a low-contrast, slightly condensed feel at large sizes;
+     400 keeps the h1 from looking heavy next to the body text below it. */
+  font-weight: 400;
+  line-height: 1.12;
+}
+
+h2 {
+  font-size: clamp(1.35rem, 1.15rem + 0.9vw, 1.65rem);
+  margin-top: var(--space-4);
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin-top: var(--space-3);
+}
+
+h4 {
+  font-size: 1rem;
+}
+
+p {
+  margin: 0 0 var(--space-2);
+}
+
+/* --- Links -------------------------------------------------------------- */
+
+a {
+  color: var(--x-check);
+  /* Underline that clears descenders rather than slicing through them. */
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Every interactive element gets the same visible focus ring. This selector
+   is intentionally broad so a new component cannot ship without one. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--x-check);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* --- Small shared pieces ------------------------------------------------ */
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--space-3) 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* The one place all-caps is permitted: a small mono label above a section. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 var(--space-1);
+}
+
+/* Dates, tags, counts — anything that is metadata rather than a sentence. */
+.meta {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+
+.lede {
+  color: var(--ink-soft);
+  font-size: 1.1875rem;
+}
+
+.measure {
+  max-width: var(--measure);
+}
+
+/* ==========================================================================
+   3. Page shell
+   ========================================================================== */
+
+.shell {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+/* Keeps the footer at the bottom of short pages without any layout tricks. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1 0 auto;
+  padding-block: var(--space-3) var(--space-4);
+}
+
+/* --- Site header / nav -------------------------------------------------- */
+
+.site-header {
+  border-bottom: 1px solid var(--rule);
+  padding-block: var(--space-2);
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+/* The wordmark. Not an h1 — the page's own h1 belongs to its content. */
+.site-mark {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.0625rem;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+.site-mark:hover {
+  color: var(--x-check);
+}
+
+.site-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav a {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+}
+
+.site-nav a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--rule);
+}
+
+/* Active section. Driven by aria-current, so the visual state and the state
+   exposed to assistive tech can never disagree. */
+.site-nav a[aria-current='page'] {
+  color: var(--ink);
+  border-bottom-color: var(--x-check);
+}
+
+/* --- Site footer -------------------------------------------------------- */
+/* Contact email and GitHub live here, not in the nav. */
+
+.site-footer {
+  border-top: 1px solid var(--rule);
+  padding-block: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--ink-faint);
+}
+
+.site-footer a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+
+.site-footer a:hover {
+  color: var(--x-check);
+  border-bottom-color: currentColor;
+}
+
+.site-footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==========================================================================
+   4. Index lists (guides and life)
+   ========================================================================== */
+
+/* --- Tag filter --------------------------------------------------------- */
+
+.tag-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.tag-filter button {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  cursor: pointer;
+}
+
+.tag-filter button:hover {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+}
+
+.tag-filter button[aria-pressed='true'] {
+  color: var(--x-check);
+  border-color: var(--x-check);
+  background: var(--x-wash);
+}
+
+/* --- Guide index: tight stack, no excerpts ------------------------------ */
+/* An auto-generated excerpt of a reference document tells a reader nothing
+   about whether the answer they need is inside it, so the guide index shows
+   only title, one-line summary, date and tags. */
+
+.entry-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.entry {
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.entry:first-child {
+  padding-top: 0;
+}
+
+.entry__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.125rem;
+  margin: 0 0 0.15rem;
+  line-height: 1.3;
+}
+
+.entry__title a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.entry__title a:hover {
+  color: var(--x-check);
+}
+
+.entry__summary {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  margin: 0 0 0.35rem;
+  max-width: var(--measure);
+}
+
+.entry__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem var(--space-1);
+  align-items: baseline;
+}
+
+/* Tag chips are labels, not controls — no hover state, no pointer. */
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--z-check);
+  background: var(--z-wash);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  white-space: nowrap;
+}
+
+/* Hidden by the client-side tag filter. `!important` because .entry carries a
+   display value from its own rules and the filter must always win. */
+.is-hidden {
+  display: none !important;
+}
+
+/* --- Life index: excerpts and covers allowed ---------------------------- */
+
+.post {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: var(--space-2);
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  align-items: start;
+}
+
+/* Posts with no cover image collapse to a single column so the text does not
+   sit in an empty gutter. */
+.post--nocover {
+  grid-template-columns: 1fr;
+}
+
+.post__cover {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  display: block;
+}
+
+.post__excerpt {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  max-width: var(--measure);
+}
+
+@media (max-width: 640px) {
+  .post {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   5. Prose (guide and life articles)
+   ========================================================================== */
+
+.prose {
+  max-width: var(--measure);
+}
+
+.prose > * + * {
+  margin-top: var(--space-2);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+
+.prose li + li {
+  margin-top: 0.35em;
+}
+
+.prose blockquote {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-2);
+  border-left: 2px solid var(--rule);
+  color: var(--ink-soft);
+}
+
+/* Inline `code` inside a sentence. Sized down slightly because IBM Plex Mono
+   runs large next to Newsreader at the same nominal size. */
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--raised);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.08em 0.3em;
+}
+
+/* --- Heading anchors ---------------------------------------------------- */
+/* rehype-autolink-headings appends an empty <a class="heading-anchor"> to each
+   heading; the glyph is supplied here so it costs nothing in the HTML and can
+   be hidden from the accessibility tree's text flow. */
+
+.prose h2,
+.prose h3 {
+  position: relative;
+}
+
+.heading-anchor {
+  text-decoration: none;
+  opacity: 0;
+  padding-left: 0.4em;
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+
+.heading-anchor::after {
+  content: '#';
+}
+
+/* Revealed on hovering the heading, and whenever the anchor itself is
+   keyboard-focused — a keyboard user must be able to see what they are on. */
+.prose h2:hover .heading-anchor,
+.prose h3:hover .heading-anchor,
+.heading-anchor:focus-visible {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   6. Code blocks — deliberately NOT styled as "code"
+   ========================================================================== */
+
+/*
+ * The guides use fenced blocks for matrices, row reduction and worked
+ * arithmetic, where monospace column alignment is the entire point and syntax
+ * colour is noise. A matrix must not be tinted like a Python file.
+ *
+ * So: a neutral bordered surface, generous line-height, horizontal scroll on
+ * overflow, and the Shiki inline colours stripped from plaintext blocks.
+ */
+
+/* Shiki writes `style="background-color:#fff;color:#24292e"` directly on the
+   <pre>, so both properties need !important to be themed. */
+.prose pre {
+  background: var(--raised) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: var(--space-2);
+  /* Wide matrices scroll inside their own box; the page body never scrolls
+     horizontally because of them. */
+  overflow-x: auto;
+  font-size: 0.875rem;
+  /* Generous leading so stacked matrix rows stay readable. */
+  line-height: 1.8;
+  margin-block: var(--space-2);
+}
+
+.prose pre code {
+  font-family: var(--font-mono);
+  background: none;
+  border: 0;
+  padding: 0;
+  /* Preserve author whitespace exactly — column alignment depends on it. */
+  white-space: pre;
+  display: block;
+}
+
+/*
+ * Shiki writes a literal `style="color:#..."` on every span. Astro tags the
+ * <pre> with `data-language`, and an undecorated fence comes through as
+ * "plaintext" — which is what the matrices and row reduction in the guides
+ * are. Those get their colour stripped back to body ink: a matrix must not be
+ * tinted like a Python file.
+ *
+ * Fences that declare a real language (```python, ```ts) fall outside this
+ * selector and keep their highlighting.
+ */
+.prose pre[data-language='plaintext'] span,
+.prose pre[data-language='text'] span,
+.prose pre[data-language='plain'] span,
+.prose pre:not([data-language]) span {
+  color: var(--ink) !important;
+}
+
+/* Shiki sets tabindex="0" on scrollable blocks so they can be scrolled by
+   keyboard. Remove the browser default ring in favour of the site's own,
+   which the shared [tabindex]:focus-visible rule already supplies. */
+.prose pre:focus {
+  outline: none;
+}
+
+/*
+ * In dark mode the light Shiki theme's colours are unreadable against
+ * --raised, and the site ships only a light syntax theme by design. Rather
+ * than load a second theme, dark mode drops syntax colour entirely and relies
+ * on the mono face and indentation, which is all the matrices ever needed.
+ */
+@media (prefers-color-scheme: dark) {
+  .prose pre span {
+    color: var(--ink) !important;
+  }
+}
+
+/* ==========================================================================
+   7. Tables — hairline rules, no zebra striping
+   ========================================================================== */
+
+/* Reference tables in the guides are often wider than the measure, so each
+   table is wrapped in a scroll container by the layout. */
+.table-scroll {
+  overflow-x: auto;
+  margin-block: var(--space-2);
+  max-width: 100%;
+}
+
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9375rem;
+  /* Stops a two-column table from stretching each cell across the measure. */
+  min-width: min(100%, 28rem);
+}
+
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 0.5rem 0.85rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+.prose th {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  /* The only heavier rule on the site: separating a header row from its body. */
+  border-bottom-color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* ==========================================================================
+   8. KaTeX
+   ========================================================================== */
+
+/* KaTeX ships its own colour; inherit the theme's ink instead so display math
+   is not black-on-dark in dark mode. */
+.katex {
+  color: inherit;
+  font-size: 1.05em;
+}
+
+/* A long display equation scrolls inside its own box rather than widening the
+   page. .katex-display is the wrapper rehype-katex emits for $$...$$. */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.4em;
+}
+
+/* ==========================================================================
+   9. Figures
+   ========================================================================== */
+
+figure {
+  margin: var(--space-3) 0;
+}
+
+figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--raised);
+}
+
+figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--ink-faint);
+  margin-top: var(--space-1);
+  max-width: var(--measure);
+}
+
+/* ==========================================================================
+   10. Reduced motion
+   ========================================================================== */
+
+/*
+ * The site has no scroll animation, no transitions of consequence and no
+ * autoplaying anything, so this is mostly a guarantee for anything added
+ * later — including smooth scrolling from the table-of-contents links.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

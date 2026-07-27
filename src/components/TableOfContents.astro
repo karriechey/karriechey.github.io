@@ -1,0 +1,155 @@
+---
+/**
+ * Table of contents for a guide article.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * Renders two markups from the same data:
+ *   - a sticky column, shown at viewports >= 1024px, with the current section
+ *     highlighted as the reader scrolls;
+ *   - a collapsed <details> block at the top of the article below 1024px,
+ *     where there is no room for a second column.
+ * CSS decides which one is visible; only one is ever displayed at a time.
+ *
+ * Guides are 3,000+ word reference documents that people reach from search and
+ * read one section of. The TOC is the primary navigation for that reader, not
+ * a decoration.
+ */
+
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  /** Headings from `render()`. Filtered to depth 2 and 3 by the caller. */
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+---
+
+{
+  headings.length > 0 && (
+    <>
+      {/* --- Narrow viewports: collapsed block at the top of the article --- */}
+      <details class="toc-details">
+        <summary>Contents</summary>
+        <nav aria-label="Table of contents">
+          <ol>
+            {headings.map((h) => (
+              <li class={`toc-depth-${h.depth}`}>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </details>
+
+      {/* --- Wide viewports: sticky column ------------------------------- */}
+      <nav class="toc" aria-label="Table of contents" data-toc>
+        <p class="eyebrow">Contents</p>
+        <ol>
+          {headings.map((h) => (
+            <li class={`toc-depth-${h.depth}`}>
+              <a href={`#${h.slug}`}>{h.text}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </>
+  )
+}
+
+<style>
+  /* --- Collapsed variant (default, < 1024px) --------------------------- */
+
+  .toc-details {
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--raised);
+    padding: var(--space-1) var(--space-2);
+    margin-bottom: var(--space-3);
+    max-width: var(--measure);
+  }
+
+  .toc-details summary {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    padding-block: 0.25rem;
+  }
+
+  .toc-details nav {
+    padding-top: var(--space-1);
+  }
+
+  /* --- Sticky variant (>= 1024px) -------------------------------------- */
+
+  .toc {
+    display: none;
+  }
+
+  /* Shared list styling for both variants. */
+  .toc-details ol,
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+
+  .toc-details li,
+  .toc li {
+    margin-bottom: 0.45rem;
+  }
+
+  /* h3 entries indent under their h2. */
+  .toc-depth-3 {
+    padding-left: var(--space-2);
+  }
+
+  .toc-details a,
+  .toc a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    display: block;
+    border-left: 2px solid transparent;
+    padding-left: 0.6rem;
+    margin-left: -0.6rem;
+  }
+
+  .toc-details a:hover,
+  .toc a:hover {
+    color: var(--ink);
+  }
+
+  /*
+    Current section. Set by the IntersectionObserver in GuideLayout, which is
+    the only place aria-current appears on a non-nav-item link — it marks the
+    section the reader is inside, so a screen reader user gets the same
+    orientation cue as a sighted one.
+  */
+  .toc a[aria-current='true'] {
+    color: var(--x-check);
+    border-left-color: var(--x-check);
+  }
+
+  @media (min-width: 1024px) {
+    .toc-details {
+      display: none;
+    }
+
+    .toc {
+      display: block;
+      position: sticky;
+      /* Sits a comfortable distance below the top of the viewport. */
+      top: var(--space-3);
+      /* Never taller than the viewport; scrolls internally on long articles. */
+      max-height: calc(100vh - var(--space-4));
+      overflow-y: auto;
+      padding-bottom: var(--space-2);
+    }
+  }
+</style>

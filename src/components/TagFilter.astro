@@ -1,0 +1,57 @@
+---
+/**
+ * Client-side tag filter for the guides and life indexes.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * Show/hide only. No routing, no URL state, no history entries — a filter is
+ * a viewing convenience here, not a location. Pair it with list items carrying
+ * `data-tags="tag-a|tag-b"`; everything else is handled below.
+ */
+
+interface Props {
+  /** Union of tags in the collection. "all" is prepended automatically. */
+  tags: string[];
+  /** Accessible name for the button group, e.g. "Filter guides by tag". */
+  label: string;
+}
+
+const { tags, label } = Astro.props;
+---
+
+<div class="tag-filter" role="group" aria-label={label} data-tag-filter>
+  {/* "all" is the initial state, so it is the one button pressed on load. */}
+  <button type="button" data-tag="all" aria-pressed="true">all</button>
+  {
+    tags.map((tag) => (
+      <button type="button" data-tag={tag} aria-pressed="false">
+        {tag}
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  // One filter per page, so a single document-level lookup is enough.
+  const root = document.querySelector<HTMLElement>('[data-tag-filter]');
+  const items = document.querySelectorAll<HTMLElement>('[data-tags]');
+
+  root?.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-tag]');
+    if (!button) return;
+
+    const selected = button.dataset.tag;
+
+    // aria-pressed is the source of truth: the CSS "active chip" style is
+    // driven off it, so the visual and accessible states stay in step.
+    root.querySelectorAll('button').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b === button));
+    });
+
+    items.forEach((item) => {
+      const tags = (item.dataset.tags ?? '').split('|');
+      item.classList.toggle('is-hidden', selected !== 'all' && !tags.includes(selected!));
+    });
+  });
+</script>

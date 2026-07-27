@@ -1,0 +1,56 @@
+# Build the Astro site and publish it to GitHub Pages.
+#
+# Created:      2026-07-26
+# Last updated: 2026-07-26
+#
+# One-time manual setup required in the GitHub UI before this works:
+#   Settings -> Pages -> Source must be "GitHub Actions" (not "Deploy from a branch").
+# The repository must also be public; GitHub Pages does not serve private
+# repositories on the Free plan.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Allows a deploy to be triggered by hand from the Actions tab, which is
+  # useful when a deploy fails for an infrastructure reason rather than a
+  # content reason and you want to retry without an empty commit.
+  workflow_dispatch:
+
+# The deploy job needs to write a Pages deployment and mint an OIDC token to
+# prove to GitHub Pages that the artifact came from this workflow run.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deploys at once. `cancel-in-progress: false` lets an in-flight
+# deploy finish rather than leaving Pages in a half-updated state.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # withastro/action installs Node, installs dependencies (detecting the
+      # lockfile / package manager), runs `astro build`, and uploads ./dist as
+      # the Pages artifact. It replaces a hand-rolled setup-node + npm ci chain.
+      - name: Build with Astro
+        uses: withastro/action@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

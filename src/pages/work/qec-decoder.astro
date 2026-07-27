@@ -1,0 +1,301 @@
+---
+/**
+ * The one deep project page: the surface-code decoder.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * PLACEHOLDER COPY. The structure is real — summary, question, method,
+ * figures, results, status, links — but the prose was written by Claude from a
+ * one-line brief and every number in the results table is a marked placeholder
+ * rather than an invented figure. Replace before this is shown to anyone.
+ *
+ * Figure files go in /public/work/qec/ — see FIGURES.md in that directory for
+ * what belongs in each slot.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SurfaceCode from '../../components/SurfaceCode.astro';
+
+/**
+ * Figures for the page. Kept as data so the captions sit next to the paths and
+ * a missing file is obvious at a glance.
+ */
+const FIGURES = [
+  {
+    src: '/work/qec/fig-1-lattice.svg',
+    alt: 'PLACEHOLDER — a distance-5 surface code lattice with data qubits, X-type and Z-type stabilizer checks marked.',
+    caption:
+      'Figure 1. The code being decoded. Data qubits sit at the lattice points; each check measures the parity of its four neighbours. Violet checks catch phase errors, teal checks catch bit-flip errors.',
+    width: 900,
+    height: 560,
+  },
+  {
+    src: '/work/qec/fig-2-architecture.svg',
+    alt: 'PLACEHOLDER — a block diagram of the decoder network, from syndrome input through recurrent and convolutional stages to a logical-flip prediction.',
+    caption:
+      'Figure 2. Decoder architecture. Syndrome rounds enter as a time series; the network is asked for one bit — whether a logical flip has occurred — not for the physical error pattern, which is unrecoverable in principle.',
+    width: 900,
+    height: 460,
+  },
+  {
+    src: '/work/qec/fig-3-logical-error-rate.svg',
+    alt: 'PLACEHOLDER — logical error rate against physical error rate for the learned decoder and for minimum-weight perfect matching, with error bands.',
+    caption:
+      'Figure 3. Logical error rate against physical error rate, learned decoder versus minimum-weight perfect matching. Bands are across independent training runs, not a single seed — run-to-run spread on this task is comparable to the effect being measured, so a single curve would not mean anything.',
+    width: 900,
+    height: 600,
+  },
+  {
+    src: '/work/qec/fig-4-failure-cases.svg',
+    alt: 'PLACEHOLDER — a heat map over the lattice showing where on the code the decoder fails most often.',
+    caption:
+      'Figure 4. Where the decoder is wrong. Failures are not spread evenly over the lattice, which is the most useful thing the error analysis produced.',
+    width: 900,
+    height: 560,
+  },
+];
+---
+
+<BaseLayout
+  title="A neural-network decoder for surface-code error correction"
+  description="Why a quantum computer can detect an error without learning what it was, and what a learned decoder can do about it that minimum-weight matching cannot."
+>
+  <div class="shell">
+    <article>
+      <header class="head">
+        <p class="eyebrow">National laboratory quantum computing fellowship · 2025–2026</p>
+        <h1 class="measure">A neural-network decoder for surface-code error correction</h1>
+      </header>
+
+      <div class="prose">
+        <h2>Summary</h2>
+        <p>
+          A quantum computer cannot look at its own state to see whether it has
+          been damaged — looking destroys it. Instead it measures a set of
+          carefully chosen parities that reveal that something went wrong while
+          revealing nothing about the encoded information. The catch is that
+          those measurements are also nearly silent about the error itself:
+          many different physical errors produce exactly the same measurement
+          outcome, and a decoder has to choose between them, correctly, in
+          about a microsecond, forever.
+        </p>
+        <p>
+          The standard answer is minimum-weight perfect matching, which assumes
+          the simplest explanation is the right one. It is fast, it is
+          principled, and it is provably not optimal. This project asked how
+          much of that gap a learned decoder can close on realistic
+          circuit-level noise, and — more usefully — where the remaining
+          failures actually are.
+        </p>
+
+        <h2>The research question</h2>
+        <p>
+          Matching picks the single most likely error <em>chain</em>. What
+          determines whether the logical qubit survives is the most likely
+          error <em>class</em> — the whole family of chains that would need the
+          same correction. Those two are not the same, and the gap between them
+          is where an optimal decoder lives.
+        </p>
+        <p>
+          So: can a network trained on simulated syndromes learn enough of that
+          structure to beat matching at the same code distance, and does the
+          advantage hold up under noise it was not trained on?
+        </p>
+
+        <figure>
+          <img
+            src={FIGURES[0].src}
+            alt={FIGURES[0].alt}
+            width={FIGURES[0].width}
+            height={FIGURES[0].height}
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>{FIGURES[0].caption}</figcaption>
+        </figure>
+
+        {/*
+          The interactive lattice sits here rather than on the home page: this
+          is the one place on the site where a visitor already has the context
+          to know what they are looking at, and it makes the ambiguity above
+          something they can produce themselves rather than take on trust.
+        */}
+        <h3>Try it</h3>
+        <p>
+          Put a few errors in a line and watch the interior checks fall silent.
+          A chain of length one and a chain of length five can leave the same
+          two checks lit — that is the ambiguity the decoder has to resolve, and
+          it is not a limitation of the measurement apparatus but of what a
+          parity check is.
+        </p>
+
+        <SurfaceCode />
+
+        <h2>Method</h2>
+        <h3>Data</h3>
+        <p>
+          Syndromes were generated with circuit-level noise rather than a
+          simplified independent-error model — the measurement apparatus is
+          itself faulty, so the syndrome arrives as a noisy time series over
+          repeated rounds and not as one clean snapshot. Training used tens of
+          millions of shots; the model is only converged at that scale, and
+          conclusions drawn from smaller runs were, repeatedly, artifacts.
+        </p>
+
+        <h3>Model</h3>
+        <p>
+          A recurrent stage consumes the rounds in order and a convolutional
+          stage exploits the fact that the lattice is spatially local and the
+          same everywhere. The network predicts one bit — whether a logical
+          flip has occurred — because that is the only question with a
+          well-defined answer.
+        </p>
+
+        <figure>
+          <img
+            src={FIGURES[1].src}
+            alt={FIGURES[1].alt}
+            width={FIGURES[1].width}
+            height={FIGURES[1].height}
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>{FIGURES[1].caption}</figcaption>
+        </figure>
+
+        <h3>Evaluation</h3>
+        <p>
+          Against matching on an identical held-out set of shots, with paired
+          statistics rather than two independently reported numbers — the
+          comparison of interest is per-shot agreement and disagreement, which
+          a pair of aggregate error rates throws away.
+        </p>
+        <p>
+          Run-to-run variation turned out to be large enough to swamp the
+          effect being measured, so every reported number is a mean over
+          independent training runs with a band, and single-run results are not
+          treated as evidence.
+        </p>
+
+        <h2>Results</h2>
+        <figure>
+          <img
+            src={FIGURES[2].src}
+            alt={FIGURES[2].alt}
+            width={FIGURES[2].width}
+            height={FIGURES[2].height}
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>{FIGURES[2].caption}</figcaption>
+        </figure>
+
+        <p>
+          <strong>The numbers below are placeholders.</strong> They are left
+          deliberately un-invented — fill them in from the run logs rather than
+          from memory.
+        </p>
+
+        {/* The rehype plugin that wraps tables only runs over Markdown, so a
+            table written directly in a .astro page needs the scroll container
+            added by hand. */}
+        <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Decoder</th>
+              <th>Logical error rate</th>
+              <th>Relative to matching</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Minimum-weight matching</td>
+              <td>PLACEHOLDER</td>
+              <td>1.00×</td>
+            </tr>
+            <tr>
+              <td>Learned decoder</td>
+              <td>PLACEHOLDER</td>
+              <td>PLACEHOLDER</td>
+            </tr>
+            <tr>
+              <td>Learned decoder, quantized</td>
+              <td>PLACEHOLDER</td>
+              <td>PLACEHOLDER</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <figure>
+          <img
+            src={FIGURES[3].src}
+            alt={FIGURES[3].alt}
+            width={FIGURES[3].width}
+            height={FIGURES[3].height}
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>{FIGURES[3].caption}</figcaption>
+        </figure>
+
+        <p>
+          The failure analysis was the part that changed how I thought about
+          the problem. Errors are not uniformly distributed across the lattice,
+          and looking at the actual circuit at the moment a shot fails is far
+          more informative than another point on an error-rate curve.
+        </p>
+
+        <h2>Current status</h2>
+        <p>
+          Ongoing. The current thread is quantization: a decoder that has to
+          run inside the control loop of a real machine has to fit on an FPGA
+          and finish inside the error-correction cycle, so the interesting
+          question is no longer just accuracy but how much precision can be
+          removed from the weights before accuracy goes with it.
+        </p>
+
+        <h2>Links</h2>
+        <ul>
+          <li>
+            <a href="https://github.com/karriechey/FNAL-QCDecoding-FPGA" rel="noopener">
+              Code — FNAL-QCDecoding-FPGA
+            </a>
+          </li>
+          <li>
+            <a href="/karrie-oqi-symposium-slides.pdf">Slides — OQI Symposium</a>
+          </li>
+          <li><a href="/guides/parity-checks-and-syndromes/">Background: what a syndrome does and does not tell you</a></li>
+        </ul>
+      </div>
+
+      <p class="meta back-link">
+        <a href="/work">Back to work</a>
+      </p>
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .head {
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* Figures on this page are allowed to run wider than the 68ch prose measure,
+     because a lattice diagram is unreadable at text width. The interactive
+     lattice is excluded: it is square, and at 52rem it would be an 800px box
+     that dwarfs everything around it. It keeps its own max-width. */
+  .prose :global(figure:not(.lattice-figure)) {
+    max-width: min(100%, 52rem);
+  }
+
+  .back-link {
+    margin-top: var(--space-4);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--rule);
+    max-width: var(--measure);
+  }
+</style>

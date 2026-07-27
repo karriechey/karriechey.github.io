@@ -1,0 +1,540 @@
+---
+/**
+ * Interactive surface code lattice — the one interactive element on the site.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * THE PHYSICS, because getting it subtly wrong would be worse than not
+ * shipping it:
+ *
+ *   - 5x5 data qubits sit at lattice points.
+ *   - The 4x4 squares between them are stabilizer checks. The check at grid
+ *     position (r, c) is Z-type when (r + c) is even and X-type when odd,
+ *     giving the checkerboard.
+ *   - A Z-type check measures ZZZZ. Z anticommutes with X, so it DETECTS X and
+ *     Y errors and is blind to Z. An X-type check measures XXXX and therefore
+ *     detects Z and Y, and is blind to X. Y is the only error both kinds see.
+ *   - A check fires when an ODD number of the four qubits it touches carries an
+ *     error it can detect. Even parity is silent — two errors inside one check
+ *     cancel and it reports nothing.
+ *
+ * Implementation note on structure: the checks and grid are drawn as one inline
+ * SVG, and the qubits are real HTML <button> elements positioned over it as
+ * percentages of the container. That split is deliberate. The SVG carries
+ * role="img" and a summary, which makes its subtree presentational to assistive
+ * technology — so anything that must be operable cannot live inside it. Real
+ * buttons also get Enter/Space activation, focus order and the site's focus
+ * ring for free, rather than re-implementing them on an SVG <circle>.
+ *
+ * No charting library, no framework. Vanilla TypeScript in the script below.
+ */
+
+/** The four error states a data qubit can be in. `I` is the identity — no error. */
+type ErrorKind = 'I' | 'X' | 'Z' | 'Y';
+
+const SIZE = 5;          // data qubits per side
+const CHECKS = SIZE - 1; // stabilizer checks per side: the squares between qubits
+const PAD = 30;          // SVG padding around the lattice, in viewBox units
+const CELL = 64;         // spacing between adjacent data qubits
+const EXTENT = PAD * 2 + CELL * (SIZE - 1); // square viewBox side
+
+/** Percentage position of lattice index `i` along either axis. */
+const pct = (i: number) => ((PAD + i * CELL) / EXTENT) * 100;
+
+/** Z-type when (r + c) is even, X-type when odd. */
+const checkType = (r: number, c: number): 'X' | 'Z' => ((r + c) % 2 === 0 ? 'Z' : 'X');
+
+/**
+ * Whether a check of the given type is sensitive to the given error.
+ * Kept as a named function because this is the single rule the whole component
+ * exists to demonstrate, and it is duplicated in the client script below.
+ */
+function detects(type: 'X' | 'Z', error: ErrorKind): boolean {
+  if (error === 'I') return false;
+  if (error === 'Y') return true;            // Y is seen by both kinds
+  return type === 'Z' ? error === 'X' : error === 'Z';
+}
+
+/**
+ * Initial state: one X error on the centre qubit, so a syndrome is visible
+ * before the visitor touches anything. A single error at (2,2) is touched by
+ * four checks, two of which are Z-type — so exactly two checks fire, which is
+ * the clearest possible illustration of a chain having two endpoints.
+ */
+const SEED_ROW = 2;
+const SEED_COL = 2;
+
+const initialErrors: ErrorKind[][] = Array.from({ length: SIZE }, (_, r) =>
+  Array.from({ length: SIZE }, (_, c) =>
+    r === SEED_ROW && c === SEED_COL ? ('X' as ErrorKind) : ('I' as ErrorKind),
+  ),
+);
+
+/**
+ * Compute the initial syndrome server-side, so the lattice renders with a
+ * correct syndrome even before the client script runs (or if it never does).
+ * The check at (r, c) touches data qubits (r,c), (r,c+1), (r+1,c), (r+1,c+1).
+ */
+const initialFired: boolean[][] = Array.from({ length: CHECKS }, (_, r) =>
+  Array.from({ length: CHECKS }, (_, c) => {
+    const type = checkType(r, c);
+    const touched: ErrorKind[] = [
+      initialErrors[r][c],
+      initialErrors[r][c + 1],
+      initialErrors[r + 1][c],
+      initialErrors[r + 1][c + 1],
+    ];
+    // Odd parity fires. `filter().length % 2` is the parity check itself.
+    return touched.filter((e) => detects(type, e)).length % 2 === 1;
+  }),
+);
+
+const initialErrorCount = initialErrors.flat().filter((e) => e !== 'I').length;
+const initialFiredCount = initialFired.flat().filter(Boolean).length;
+
+/** "1 error · 2 checks fired" — pluralised, because it is read aloud. */
+const readout = (errors: number, fired: number) =>
+  `${errors} ${errors === 1 ? 'error' : 'errors'} · ${fired} ${fired === 1 ? 'check' : 'checks'} fired`;
+
+const indices = Array.from({ length: SIZE }, (_, i) => i);
+const checkIndices = Array.from({ length: CHECKS }, (_, i) => i);
+---
+
+<figure class="lattice-figure">
+  <div class="lattice" data-lattice>
+    <svg
+      viewBox={`0 0 ${EXTENT} ${EXTENT}`}
+      role="img"
+      aria-label="A five by five lattice of data qubits with sixteen stabilizer checks between them, arranged in a checkerboard of two types. Checks that detect an error are filled; the rest are empty."
+    >
+      <!-- Stabilizer checks. Filled with their type's wash colour when fired,
+           transparent otherwise; the outline always carries the type colour so
+           the checkerboard stays legible in the silent state. -->
+      {
+        checkIndices.map((r) =>
+          checkIndices.map((c) => {
+            const type = checkType(r, c);
+            return (
+              <rect
+                class={`check check--${type.toLowerCase()}`}
+                data-check
+                data-row={r}
+                data-col={c}
+                data-type={type}
+                data-fired={initialFired[r][c] ? 'true' : 'false'}
+                x={PAD + c * CELL}
+                y={PAD + r * CELL}
+                width={CELL}
+                height={CELL}
+              />
+            );
+          }),
+        )
+      }
+
+      <!-- Lattice lines. Purely visual: they show which qubits are neighbours. -->
+      {
+        indices.map((i) => (
+          <>
+            <line
+              class="grid-line"
+              x1={PAD}
+              y1={PAD + i * CELL}
+              x2={PAD + CELL * (SIZE - 1)}
+              y2={PAD + i * CELL}
+            />
+            <line
+              class="grid-line"
+              x1={PAD + i * CELL}
+              y1={PAD}
+              x2={PAD + i * CELL}
+              y2={PAD + CELL * (SIZE - 1)}
+            />
+          </>
+        ))
+      }
+    </svg>
+
+    <!-- Data qubits. Real buttons, positioned as percentages so they track the
+         SVG exactly at any width. -->
+    {
+      indices.map((r) =>
+        indices.map((c) => {
+          const error = initialErrors[r][c];
+          return (
+            <button
+              type="button"
+              class="qubit"
+              data-qubit
+              data-row={r}
+              data-col={c}
+              data-error={error}
+              style={`left:${pct(c)}%; top:${pct(r)}%`}
+              aria-label={`Data qubit row ${r + 1}, column ${c + 1}. ${
+                error === 'I' ? 'No error' : `${error} error`
+              }.`}
+            >
+              <span class="qubit__dot" aria-hidden="true">
+                {error === 'I' ? '' : error}
+              </span>
+            </button>
+          );
+        }),
+      )
+    }
+  </div>
+
+  <div class="lattice-bar">
+    <p class="meta readout" data-readout aria-live="polite">
+      {readout(initialErrorCount, initialFiredCount)}
+    </p>
+
+    <div class="lattice-bar__right">
+      <ul class="legend meta">
+        <li><span class="swatch swatch--z" aria-hidden="true"></span>Z-check (sees X, Y)</li>
+        <li><span class="swatch swatch--x" aria-hidden="true"></span>X-check (sees Z, Y)</li>
+      </ul>
+      <button type="button" class="clear" data-clear>Clear errors</button>
+    </div>
+  </div>
+
+  <figcaption>
+    Click a qubit to cycle its error: none, X, Z, Y. The checks that light up are
+    the <strong>syndrome</strong> — the only thing a real quantum computer ever
+    learns about what went wrong, because measuring the qubits directly would
+    destroy the state they are protecting. Notice that a syndrome only marks the
+    <em>ends</em> of a chain of errors and never the chain itself: lay errors in
+    a line and the interior checks fall silent, so a long chain and a short one
+    can look identical. Choosing between the possibilities that remain is what a
+    decoder does, and why it is hard.
+  </figcaption>
+</figure>
+
+<script>
+  /**
+   * Client behaviour for the lattice. Mirrors the physics computed at build
+   * time in the component frontmatter — see the long comment there.
+   */
+  type ErrorKind = 'I' | 'X' | 'Z' | 'Y';
+
+  /** none -> X -> Z -> Y -> none */
+  const NEXT: Record<ErrorKind, ErrorKind> = { I: 'X', X: 'Z', Z: 'Y', Y: 'I' };
+
+  const root = document.querySelector<HTMLElement>('[data-lattice]');
+
+  if (root) {
+    const qubits = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-qubit]'));
+    const checks = Array.from(root.querySelectorAll<SVGRectElement>('[data-check]'));
+    const figure = root.closest('figure');
+    const readoutEl = figure?.querySelector<HTMLElement>('[data-readout]');
+    const clearButton = figure?.querySelector<HTMLButtonElement>('[data-clear]');
+
+    // Errors live in a plain 2-D array; the DOM is a view of it.
+    const size = Math.round(Math.sqrt(qubits.length));
+    const errors: ErrorKind[][] = Array.from({ length: size }, () =>
+      Array.from({ length: size }, () => 'I' as ErrorKind),
+    );
+
+    // Adopt whatever the server rendered rather than assuming a blank board,
+    // so the seeded error survives hydration.
+    for (const button of qubits) {
+      const r = Number(button.dataset.row);
+      const c = Number(button.dataset.col);
+      errors[r][c] = (button.dataset.error as ErrorKind) ?? 'I';
+    }
+
+    /** A Z-check sees X and Y; an X-check sees Z and Y; both are blind to their own type. */
+    const detects = (type: 'X' | 'Z', error: ErrorKind): boolean => {
+      if (error === 'I') return false;
+      if (error === 'Y') return true;
+      return type === 'Z' ? error === 'X' : error === 'Z';
+    };
+
+    const label = (r: number, c: number, error: ErrorKind) =>
+      `Data qubit row ${r + 1}, column ${c + 1}. ${error === 'I' ? 'No error' : `${error} error`}.`;
+
+    /** Recompute the whole syndrome and repaint. Cheap: 16 checks, 4 qubits each. */
+    const update = () => {
+      let firedCount = 0;
+
+      for (const check of checks) {
+        const r = Number(check.dataset.row);
+        const c = Number(check.dataset.col);
+        const type = check.dataset.type as 'X' | 'Z';
+
+        // The check at (r, c) touches the four qubits at its corners.
+        const touched: ErrorKind[] = [
+          errors[r][c],
+          errors[r][c + 1],
+          errors[r + 1][c],
+          errors[r + 1][c + 1],
+        ];
+
+        // Odd parity fires; even parity is silent, including two errors that cancel.
+        const fired = touched.filter((e) => detects(type, e)).length % 2 === 1;
+        check.dataset.fired = String(fired);
+        if (fired) firedCount += 1;
+      }
+
+      const errorCount = errors.flat().filter((e) => e !== 'I').length;
+
+      if (readoutEl) {
+        readoutEl.textContent =
+          `${errorCount} ${errorCount === 1 ? 'error' : 'errors'} · ` +
+          `${firedCount} ${firedCount === 1 ? 'check' : 'checks'} fired`;
+      }
+    };
+
+    for (const button of qubits) {
+      // A <button> already fires click on Enter and Space, so no key handler is
+      // needed — that is the reason these are buttons and not SVG circles.
+      button.addEventListener('click', () => {
+        const r = Number(button.dataset.row);
+        const c = Number(button.dataset.col);
+
+        const next = NEXT[errors[r][c]];
+        errors[r][c] = next;
+
+        button.dataset.error = next;
+        button.setAttribute('aria-label', label(r, c, next));
+
+        const dot = button.querySelector('.qubit__dot');
+        if (dot) dot.textContent = next === 'I' ? '' : next;
+
+        update();
+      });
+    }
+
+    clearButton?.addEventListener('click', () => {
+      for (const button of qubits) {
+        const r = Number(button.dataset.row);
+        const c = Number(button.dataset.col);
+        errors[r][c] = 'I';
+        button.dataset.error = 'I';
+        button.setAttribute('aria-label', label(r, c, 'I'));
+        const dot = button.querySelector('.qubit__dot');
+        if (dot) dot.textContent = '';
+      }
+      update();
+    });
+  }
+</script>
+
+<style>
+  .lattice-figure {
+    margin: 0;
+    max-width: 30rem;
+  }
+
+  /*
+    Square container. The SVG fills it and the qubit buttons are positioned
+    over it in percentages, so both scale together with no JavaScript involved
+    in layout.
+  */
+  .lattice {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+  }
+
+  .lattice svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* --- Stabilizer checks ------------------------------------------------ */
+
+  .check {
+    fill: transparent;
+    stroke-width: 1;
+  }
+
+  /* Unfired: transparent fill, faint type-coloured outline so the
+     checkerboard is still readable when nothing has fired. */
+  .check--x {
+    stroke: var(--x-check);
+    stroke-opacity: 0.28;
+  }
+
+  .check--z {
+    stroke: var(--z-check);
+    stroke-opacity: 0.28;
+  }
+
+  /* Fired: filled with the type's wash colour and a full-strength outline. */
+  .check--x[data-fired='true'] {
+    fill: var(--x-wash);
+    stroke-opacity: 1;
+  }
+
+  .check--z[data-fired='true'] {
+    fill: var(--z-wash);
+    stroke-opacity: 1;
+  }
+
+  .grid-line {
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+
+  /* --- Data qubits ------------------------------------------------------ */
+
+  /*
+    The button is deliberately larger than the circle it draws: the visible dot
+    is about 45% of the button, giving a comfortable touch target at 360px
+    without a heavy-looking lattice.
+  */
+  .qubit {
+    position: absolute;
+    width: 13%;
+    height: 13%;
+    transform: translate(-50%, -50%);
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+  }
+
+  .qubit__dot {
+    width: 46%;
+    height: 46%;
+    min-width: 18px;
+    min-height: 18px;
+    border-radius: 50%;
+    background: var(--raised);
+    border: 1.5px solid var(--ink-faint);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  /* An errored qubit is filled and outlined in ink so it reads as "changed"
+     without introducing a third accent colour. */
+  .qubit[data-error='X'] .qubit__dot,
+  .qubit[data-error='Z'] .qubit__dot,
+  .qubit[data-error='Y'] .qubit__dot {
+    border-color: var(--ink);
+    background: var(--paper);
+    font-weight: 500;
+  }
+
+  .qubit:hover .qubit__dot {
+    border-color: var(--x-check);
+  }
+
+  /* The focus ring goes on the circle, not the invisible button box, so it
+     lands where the eye expects it. */
+  .qubit:focus-visible {
+    outline: none;
+  }
+
+  .qubit:focus-visible .qubit__dot {
+    outline: 2px solid var(--x-check);
+    outline-offset: 2px;
+  }
+
+  /* --- Readout and controls --------------------------------------------- */
+
+  .lattice-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-2);
+    margin-top: var(--space-2);
+    padding-top: var(--space-1);
+    border-top: 1px solid var(--rule);
+  }
+
+  .lattice-bar__right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+  }
+
+  .readout {
+    color: var(--ink);
+    margin: 0;
+    /* Reserve the line so the bar does not jump when the count changes width. */
+    min-width: 14ch;
+  }
+
+  .legend {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+    margin: 0;
+    padding: 0;
+    font-size: 0.75rem;
+  }
+
+  .legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .swatch {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 2px;
+    display: inline-block;
+  }
+
+  .swatch--x {
+    background: var(--x-wash);
+    border: 1px solid var(--x-check);
+  }
+
+  .swatch--z {
+    background: var(--z-wash);
+    border: 1px solid var(--z-check);
+  }
+
+  .clear {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    cursor: pointer;
+  }
+
+  .clear:hover {
+    color: var(--ink);
+    border-color: var(--ink-faint);
+  }
+
+  figcaption {
+    margin-top: var(--space-2);
+    /* Overrides the global mono figcaption: this is a paragraph of explanation,
+       not a figure label, so it reads better in the body serif. */
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 34rem;
+  }
+
+  /* Below 420px the legend competes with the readout for the same line; drop
+     it rather than let the bar wrap into four rows. The colours are still
+     explained in the caption's surrounding prose. */
+  @media (max-width: 420px) {
+    .legend {
+      display: none;
+    }
+  }
+</style>

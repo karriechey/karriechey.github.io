@@ -1,0 +1,43 @@
+---
+/**
+ * A single guide article.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ */
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+
+export async function getStaticPaths() {
+  // Drafts are excluded here as well as in the index, so a draft has no page
+  // at all — not an unlisted one that is still reachable by guessing the URL.
+  const guides = await getCollection('guides', ({ data }) => !data.draft);
+
+  return guides.map((guide) => ({
+    params: { slug: guide.id },
+    props: { guide },
+  }));
+}
+
+// Declared explicitly rather than inferred: annotating getStaticPaths with the
+// `GetStaticPaths` type widens Astro.props back to `unknown`.
+interface Props {
+  guide: CollectionEntry<'guides'>;
+}
+
+const { guide } = Astro.props as Props;
+
+// `headings` is what the table of contents is built from.
+const { Content, headings } = await render(guide);
+---
+
+<GuideLayout
+  title={guide.data.title}
+  summary={guide.data.summary}
+  date={guide.data.date}
+  tags={guide.data.tags}
+  headings={headings}
+>
+  <Content />
+</GuideLayout>

@@ -1,0 +1,93 @@
+---
+/**
+ * A single life post.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * These are short pieces, so they use the plain BaseLayout rather than
+ * GuideLayout — no table of contents, no sticky column. They still get the
+ * shared `.prose` styling, so a post containing math or a table looks the same
+ * as a guide containing one.
+ */
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, isoDate } from '../../site';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('life', ({ data }) => !data.draft);
+
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+// Declared explicitly rather than inferred from getStaticPaths: annotating
+// that function with the `GetStaticPaths` type widens the props back to
+// `unknown`, which is what `astro check` complains about.
+interface Props {
+  post: CollectionEntry<'life'>;
+}
+
+const { post } = Astro.props as Props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={post.data.title} description={post.data.summary}>
+  <div class="shell">
+    <article>
+      <header class="post-head">
+        <h1 class="measure">{post.data.title}</h1>
+        <p class="lede measure">{post.data.summary}</p>
+        <div class="entry__meta">
+          <time class="meta" datetime={isoDate(post.data.date)}>
+            {formatDate(post.data.date)}
+          </time>
+          {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+        </div>
+      </header>
+
+      {
+        post.data.cover && (
+          <figure class="measure">
+            {/* alt="" because the caption-free cover is decorative here — the
+                post's own title already carries the meaning. */}
+            <img
+              src={post.data.cover}
+              alt=""
+              width={1600}
+              height={1200}
+              loading="eager"
+              decoding="async"
+            />
+          </figure>
+        )
+      }
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      <p class="meta back-link">
+        <a href="/life">Back to life</a>
+      </p>
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .post-head {
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .back-link {
+    margin-top: var(--space-4);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--rule);
+    max-width: var(--measure);
+  }
+</style>

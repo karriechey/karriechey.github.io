@@ -1,0 +1,186 @@
+---
+/**
+ * Life index — cello, photography and personal writing, mixed feed.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * Unlike /guides, this index DOES show an excerpt and a cover image where one
+ * exists. Different content, different treatment: a reader browsing personal
+ * writing benefits from a first sentence in a way a reader searching a
+ * reference document does not.
+ *
+ * The cello channel is linked, never embedded. A YouTube iframe is hundreds of
+ * kilobytes and drags third-party tracking onto a site that otherwise has none.
+ */
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagFilter from '../../components/TagFilter.astro';
+import { PHOTOS } from '../../data/photos';
+import { SITE, formatDate, isoDate } from '../../site';
+
+const posts = (await getCollection('life', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
+
+/**
+ * Build a short excerpt from the raw Markdown body.
+ *
+ * Deliberately crude — it strips the handful of constructs that would look
+ * wrong as plain text (headings, emphasis, link syntax, inline code) and takes
+ * the first paragraph. Anything more elaborate is a rendering pipeline, and
+ * the hand-written `summary` already carries the real weight.
+ */
+function excerpt(body: string | undefined, limit = 220): string {
+  if (!body) return '';
+  const firstParagraph =
+    body
+      .split(/\n\s*\n/)
+      // Skip frontmatter leftovers, headings and images.
+      .find((block) => block.trim() && !/^\s*(#|!\[|<)/.test(block.trim())) ?? '';
+
+  const plain = firstParagraph
+    .replace(/`([^`]+)`/g, '$1')       // inline code
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // links -> link text
+    .replace(/[*_]{1,3}/g, '')          // emphasis markers
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return plain.length > limit ? `${plain.slice(0, limit).trimEnd()}…` : plain;
+}
+---
+
+<BaseLayout
+  title="Life"
+  description="Cello, photography and occasional writing that has nothing to do with quantum computing."
+>
+  <div class="shell">
+    <header class="page-head">
+      <h1>Life</h1>
+      <p class="lede measure">
+        I love spending time in my mind thinking. I like being out in nature observing the beautiful earth that we live in.
+        I play the cello too
+        <a href={SITE.youtube} rel="noopener">my youtube channel</a>.
+      </p>
+    </header>
+
+    {/* --- Photographs ---------------------------------------------------- */}
+    {
+      PHOTOS.length > 0 && (
+        <section class="photos" aria-labelledby="photos-heading">
+          <h2 id="photos-heading" class="eyebrow">Photographs</h2>
+          <ul class="photo-grid">
+            {PHOTOS.map((photo) => (
+              <li>
+                <figure>
+                  {/*
+                    Plain <img>, lazy-loaded, no lightbox library. Explicit
+                    width/height come from the data file so the grid does not
+                    reflow as images arrive.
+                  */}
+                  <img
+                    src={photo.src}
+                    alt={photo.alt}
+                    width={photo.width}
+                    height={photo.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <figcaption>{photo.caption}</figcaption>
+                </figure>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {/* --- Writing -------------------------------------------------------- */}
+    <section aria-labelledby="writing-heading">
+      <h2 id="writing-heading" class="eyebrow">Writing</h2>
+
+      {allTags.length > 0 && <TagFilter tags={allTags} label="Filter posts by tag" />}
+
+      <ul class="entry-list">
+        {
+          posts.map((post) => (
+            <li
+              class={`post${post.data.cover ? '' : ' post--nocover'}`}
+              data-tags={post.data.tags.join('|')}
+            >
+              {post.data.cover && (
+                <a href={`/life/${post.id}/`}>
+                  <img
+                    class="post__cover"
+                    src={post.data.cover}
+                    alt=""
+                    width={1600}
+                    height={1200}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+              )}
+              <div>
+                <h3 class="entry__title">
+                  <a href={`/life/${post.id}/`}>{post.data.title}</a>
+                </h3>
+                <p class="entry__summary">{post.data.summary}</p>
+                <p class="post__excerpt">{excerpt(post.body)}</p>
+                <div class="entry__meta">
+                  <time class="meta" datetime={isoDate(post.data.date)}>
+                    {formatDate(post.data.date)}
+                  </time>
+                  {post.data.tags.map((tag) => (
+                    <span class="tag">{tag}</span>
+                  ))}
+                </div>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+
+      {posts.length === 0 && <p class="lede">Nothing written here yet.</p>}
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-bottom: var(--space-3);
+  }
+
+  .photos {
+    margin-bottom: var(--space-4);
+  }
+
+  /* auto-fill + minmax gives a grid that reflows from three columns to two to
+     one without a single media query, and stays sane at 360px. */
+  .photo-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-2);
+  }
+
+  .photo-grid figure {
+    margin: 0;
+  }
+
+  .photo-grid img {
+    /* Uniform cells regardless of the source images' aspect ratios. */
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  /* The cover image column shrinks before the text does on narrow screens. */
+  .post__cover {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+</style>

@@ -1,0 +1,201 @@
+---
+/**
+ * Article layout for a single guide.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * Two-column at >= 1024px: article on the left at a 68ch measure, sticky table
+ * of contents on the right. Single column below that, with the TOC collapsed
+ * into a <details> block above the article.
+ *
+ * The prose styling itself (code blocks that are not styled as "code", hairline
+ * tables, KaTeX, heading anchors) lives in global.css so life posts and the
+ * QEC work page get the same treatment.
+ */
+import type { MarkdownHeading } from 'astro';
+import BaseLayout from './BaseLayout.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import { SITE, formatDate, isoDate } from '../site';
+
+interface Props {
+  title: string;
+  summary: string;
+  date: Date;
+  tags: string[];
+  headings: MarkdownHeading[];
+}
+
+const { title, summary, date, tags, headings } = Astro.props;
+
+// Only h2 and h3 go in the TOC. h1 is the article title (rendered here, not in
+// the Markdown), and h4 is too fine-grained to be a navigation target.
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+// Pre-filled correction email. `encodeURIComponent` so a title containing an
+// ampersand does not truncate the subject line.
+const correctionsHref = `mailto:${SITE.email}?subject=${encodeURIComponent(`Correction: ${title}`)}`;
+---
+
+<BaseLayout title={title} description={summary}>
+  <div class="shell guide-shell">
+    <article class="guide">
+      <header class="guide__head">
+        <h1>{title}</h1>
+        <p class="lede measure">{summary}</p>
+        <div class="entry__meta">
+          <time class="meta" datetime={isoDate(date)}>{formatDate(date)}</time>
+          {tags.map((tag) => <span class="tag">{tag}</span>)}
+        </div>
+      </header>
+
+      {/* Renders as a <details> block here on narrow viewports; the sticky
+          copy in the aside below takes over at >= 1024px. */}
+      <TableOfContents headings={tocHeadings} />
+
+      <div class="prose">
+        <slot />
+      </div>
+
+      <footer class="guide__foot">
+        <p class="meta">
+          Found a mistake, or a step that does not follow?
+          <a href={correctionsHref}>Tell me</a> and I will fix it.
+        </p>
+      </footer>
+    </article>
+
+    <aside class="guide__aside">
+      <TableOfContents headings={tocHeadings} />
+    </aside>
+  </div>
+</BaseLayout>
+
+<script>
+  /**
+   * Highlight the section the reader is currently inside.
+   *
+   * Approach: observe every h2/h3 in the article and keep an ordered record of
+   * which ones are on screen. The topmost visible heading wins. When nothing
+   * is visible (the reader is in the middle of a long section, with its
+   * heading scrolled off the top) the last heading passed remains marked,
+   * which is the behaviour a reader expects.
+   */
+  const links = document.querySelectorAll<HTMLAnchorElement>('[data-toc] a');
+
+  if (links.length > 0) {
+    // Map slug -> link, so a heading can find its entry without a DOM query.
+    const linkBySlug = new Map<string, HTMLAnchorElement>();
+    links.forEach((link) => linkBySlug.set(decodeURIComponent(link.hash.slice(1)), link));
+
+    const headings = Array.from(
+      document.querySelectorAll<HTMLElement>('.prose h2[id], .prose h3[id]'),
+    ).filter((heading) => linkBySlug.has(heading.id));
+
+    let activeSlug = headings[0]?.id ?? '';
+
+    const setActive = (slug: string) => {
+      if (slug === activeSlug) return;
+      linkBySlug.get(activeSlug)?.removeAttribute('aria-current');
+      linkBySlug.get(slug)?.setAttribute('aria-current', 'true');
+      activeSlug = slug;
+    };
+
+    linkBySlug.get(activeSlug)?.setAttribute('aria-current', 'true');
+
+    const visible = new Set<string>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const id = (entry.target as HTMLElement).id;
+          if (entry.isIntersecting) visible.add(id);
+          else visible.delete(id);
+        }
+
+        // Document order, not intersection order — the observer callback
+        // delivers entries in an unspecified order.
+        const first = headings.find((h) => visible.has(h.id));
+        if (first) {
+          setActive(first.id);
+          return;
+        }
+
+        // Nothing visible: the reader is inside a section whose heading has
+        // scrolled past the top. Mark the last heading above the viewport.
+        let candidate = headings[0];
+        for (const heading of headings) {
+          if (heading.getBoundingClientRect().top < 0) candidate = heading;
+          else break;
+        }
+        if (candidate) setActive(candidate.id);
+      },
+      {
+        // Ignore the bottom two-thirds of the viewport, so a heading only
+        // counts as "current" once it has reached the upper reading band.
+        rootMargin: '0px 0px -66% 0px',
+        threshold: 0,
+      },
+    );
+
+    headings.forEach((heading) => observer.observe(heading));
+  }
+</script>
+
+<style>
+  /*
+    Single column by default. The measure (68ch) is applied to .prose in
+    global.css, so the article never runs the full width even here.
+  */
+  .guide-shell {
+    display: block;
+  }
+
+  .guide__head {
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .guide__head h1 {
+    max-width: var(--measure);
+  }
+
+  .guide__foot {
+    margin-top: var(--space-4);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--rule);
+    max-width: var(--measure);
+  }
+
+  .guide__aside {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    /*
+      The page shell is full width, but this grid is not stretched to fill it:
+      the article column is capped a little above the prose measure and the
+      columns are packed to the start. A `1fr` article column would leave a
+      wide empty gap between the end of the 68ch prose and a table of contents
+      pinned to the far right edge.
+
+      `minmax(0, ...)` on the first track stops a wide code block or table from
+      blowing the grid out instead of scrolling inside itself.
+    */
+    .guide-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 78ch) minmax(12rem, 16rem);
+      justify-content: start;
+      gap: var(--space-4);
+      align-items: start;
+    }
+
+    .guide__aside {
+      display: block;
+      /* The sticky positioning lives on .toc inside the component; the aside
+         is a plain grid cell that must be full height for it to work. */
+      align-self: stretch;
+    }
+  }
+</style>

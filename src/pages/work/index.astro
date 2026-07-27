@@ -1,0 +1,168 @@
+---
+/**
+ * Work index.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * Four projects. One of them links through to its own page; the rest end here.
+ * The copy leads with the problem rather than the technology — see the house
+ * rule in src/data/work.ts.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { PROJECTS } from '../../data/work';
+---
+
+<BaseLayout
+  title="Work"
+  description="Machine-learning decoders for quantum error correction, handwriting recognition for planetary science archives, and other things I have spent real time on."
+>
+  <div class="shell">
+    <header class="page-head">
+      <h1>Work</h1>
+      <p class="lede measure">
+        Four projects. 
+      </p>
+    </header>
+
+    <ul class="work-list">
+      {
+        PROJECTS.map((project) => (
+          <li class="work-item">
+            <figure class="work-item__figure">
+              <img
+                src={project.image}
+                alt={project.imageAlt}
+                width={project.width}
+                height={project.height}
+                loading="lazy"
+                decoding="async"
+              />
+            </figure>
+
+            <div class="work-item__body">
+              <p class="eyebrow">{project.context}</p>
+
+              <h2 class="work-item__title">
+                {/* Only the deep project is a link; the others have no page to
+                    go to, and a title that looks clickable but is not is worse
+                    than a plain one. */}
+                {project.href ? <a href={project.href}>{project.title}</a> : project.title}
+              </h2>
+
+              <p class="work-item__problem">{project.problem}</p>
+              <p class="work-item__stack meta">{project.stack}</p>
+
+              <ul class="work-item__links">
+                {project.links.map((link) => (
+                  <li>
+                    <a
+                      href={link.href}
+                      rel={link.href.startsWith('http') ? 'noopener' : undefined}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-bottom: var(--space-4);
+  }
+
+  .work-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .work-item {
+    display: grid;
+    /* Figure column is fixed-ish; the text column takes the rest and is capped
+       by its own measure below. */
+    grid-template-columns: 18rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .work-item:first-child {
+    padding-top: 0;
+  }
+
+  .work-item:last-child {
+    border-bottom: 0;
+  }
+
+  .work-item__figure {
+    margin: 0;
+  }
+
+  .work-item__figure img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 8 / 5;
+    object-fit: cover;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--raised);
+  }
+
+  .work-item__body {
+    max-width: var(--measure);
+  }
+
+  .work-item__title {
+    /* Overrides the global h2 top margin — inside a grid cell there is nothing
+       above it to be separated from. */
+    margin-top: 0;
+    font-size: 1.3rem;
+  }
+
+  .work-item__title a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .work-item__title a:hover {
+    color: var(--x-check);
+  }
+
+  .work-item__problem {
+    margin-bottom: var(--space-1);
+  }
+
+  .work-item__stack {
+    color: var(--ink-soft);
+    margin-bottom: var(--space-2);
+  }
+
+  .work-item__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  /* Single column below the point where a 18rem figure stops leaving a usable
+     text column. */
+  @media (max-width: 800px) {
+    .work-item {
+      grid-template-columns: 1fr;
+      gap: var(--space-2);
+    }
+  }
+</style>

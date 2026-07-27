@@ -1,0 +1,92 @@
+---
+/**
+ * The single base layout. Every page on the site renders through this.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ *
+ * Responsibilities: <head> metadata, font loading, the global stylesheet, the
+ * KaTeX stylesheet, the skip link, header and footer. Page content goes in the
+ * default slot and is wrapped in <main>.
+ */
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../site';
+
+// The global stylesheet, then KaTeX. Order matters: KaTeX must come after
+// global.css so its own rules win over generic element styling, while the
+// small `.katex { color: inherit }` override in global.css is scoped tightly
+// enough to still apply.
+import '../styles/global.css';
+// KaTeX's stylesheet is imported here — once, globally — rather than per
+// guide, so a page with math never renders unstyled boxes on first paint.
+// Vite fingerprints and inlines the font files it references.
+import 'katex/dist/katex.min.css';
+
+interface Props {
+  /** Page title, without the site-name suffix. */
+  title: string;
+  /** Page description. Every page sets its own; SITE.description is a fallback. */
+  description?: string;
+  /** Set true on the home page so its <title> is not "Home — Karrie Chey". */
+  bareTitle?: boolean;
+}
+
+const { title, description = SITE.description, bareTitle = false } = Astro.props;
+
+const fullTitle = bareTitle ? title : `${title} — ${SITE.name}`;
+
+// Canonical URL for this page, resolved against `site` in astro.config.mjs.
+const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- The favicon is a 2x2 checkerboard of rounded squares in the two accent
+         colours: the smallest possible surface code plaquette. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!--
+      Google Fonts. Two families only:
+        Newsreader      — headings AND body. A heading differs from a sentence
+                          by size and weight, not by voice.
+        IBM Plex Mono   — utility only: dates, tags, counts, code, nav links.
+      display=swap so text paints in a fallback immediately rather than
+      blocking on the font download.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap"
+    />
+
+    <!-- Open Graph. Minimal on purpose — no analytics, no tracking pixels. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <Nav />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

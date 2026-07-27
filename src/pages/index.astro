@@ -1,0 +1,142 @@
+---
+/**
+ * Home page. Doubles as the About page — there is no separate one, by design.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-27
+ *
+ * ============================================================================
+ *  EDITING THE BIO
+ * ----------------------------------------------------------------------------
+ *  All of the text on this page lives in the HTML below, between the
+ *  "EDIT FROM HERE" and "EDIT TO HERE" markers. It is plain text inside <p>
+ *  tags — change the words, save, and the dev server reloads the page.
+ *
+ *  Things worth knowing:
+ *    - A link is <a href="/where">the words you click</a>.
+ *    - A blank line in the source does NOT make a new paragraph. Each
+ *      paragraph needs its own <p> ... </p> wrapper.
+ *    - Do not use a raw & or < in the text. Write &amp; and &lt;.
+ *    - The em dash is — and can be pasted straight in.
+ *    - If the page goes blank after an edit, a tag is unclosed. Undo and
+ *      re-check that every <p> has a matching </p>.
+ * ============================================================================
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../site';
+---
+
+<BaseLayout
+  title="Karrie Chey"
+  bareTitle
+  description="Karrie Chey — computer science undergraduate working on machine-learning decoders for quantum error correction."
+>
+  <div class="shell home">
+    <div class="intro">
+      <img
+        class="portrait"
+        src="/portrait.jpg"
+        alt="Karrie Chey sitting on a granite summit at sunset, mountains receding into haze behind her."
+        width="1200"
+        height="1510"
+        loading="eager"
+        decoding="async"
+      />
+
+      <div class="intro__text">
+        <h1>Karrie Chey</h1>
+
+        {/* ============ EDIT FROM HERE ============ */}
+
+        <p class="lede">
+          I am 4th year computer science student with a concentration in Artificial intelligence (AI), finishing my degree in Mar 2027. My current research focuses on Quantum Computing. Before that I spent
+          time in a neurology lab and a planetary science lab at UCLA, which between
+          them taught me more about handling messy data than any course did.
+        </p>
+
+        {/* The "currently" line goes stale fastest. It is one paragraph with
+            nothing clever around it, for exactly that reason. */}
+        <p>
+          <span class="eyebrow">Currently</span>
+          Finishing a research project on Machine-Learning Surface Codes Syndrome Decoding
+          for Quantum Error Correction (QEC): Targeting FPGA Deployment.
+
+        </p>
+
+        <p>
+          Some things I have worked on:
+          <a href="/work/qec-decoder">a neural-network decoder for surface-code
+          error correction</a>, <a href="/work">reading sixty years of
+          handwritten meteorite notebooks</a>, and
+          <a href="/guides/parity-checks-and-syndromes/">an explanation of why a
+          syndrome never tells you the error</a>.
+        </p>
+
+        <p>
+          Here is my <a href="/cv.pdf">CV</a>, and you can reach me at
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+        </p>
+
+        {/* ============ EDIT TO HERE ============ */}
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .home {
+    padding-block: var(--space-2) 0;
+  }
+
+  /*
+    Photo left, words right. The whole block is capped even though the page
+    shell is full width — a bio paragraph stretched across a 27-inch monitor
+    is unreadable, and the portrait would have to be enormous to balance it.
+  */
+  .intro {
+    display: grid;
+    grid-template-columns: 16rem minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: start;
+    max-width: 62rem;
+  }
+
+  .portrait {
+    width: 100%;
+    height: auto;
+    /* Crops the source photo to a portrait rectangle, holding focus on the
+       upper-left where the subject sits. */
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 40% 35%;
+    border-radius: 3px;
+  }
+
+  .intro__text {
+    max-width: var(--measure);
+  }
+
+  .intro__text h1 {
+    margin-bottom: var(--space-2);
+  }
+
+  /* The "Currently" label sits inline at the head of its paragraph rather than
+     on its own line — it is a marker, not a heading. */
+  .intro__text .eyebrow {
+    display: inline;
+    margin-right: 0.5rem;
+  }
+
+  @media (max-width: 700px) {
+    .intro {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    /* The portrait stops being a column and becomes a modest inline image;
+       full-width at 360px would push everything else below the fold. */
+    .portrait {
+      max-width: 12rem;
+    }
+  }
+</style>

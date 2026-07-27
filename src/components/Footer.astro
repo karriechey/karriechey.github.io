@@ -1,0 +1,28 @@
+---
+/**
+ * Site footer. Holds contact email and GitHub — these live here rather than in
+ * the nav, which stays at exactly four items.
+ *
+ * Created:      2026-07-26
+ * Last updated: 2026-07-26
+ */
+import { SITE } from '../site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="shell site-footer__inner">
+    <p>&copy; {year} {SITE.name}</p>
+
+    <ul>
+      <li>
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </li>
+      <li>
+        {/* rel="me" lets the link be used for identity verification. */}
+        <a href={SITE.github} rel="me noopener">GitHub</a>
+      </li>
+    </ul>
+  </div>
+</footer>
