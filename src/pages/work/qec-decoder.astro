@@ -37,26 +37,37 @@ const FIGURES = [
     height: 1678,
   },
   {
-    src: '/work/qec/fig-2-architecture.svg',
+    // Same source notebooks as Figure 1, but every round drawn at once rather
+    // than a single slice — 1514 detector groups against that figure's one
+    // round. Square viewBox again (3981 × 3981).
+    src: '/work/qec/detectors-overlaid.svg',
+    alt: 'The same surface-code patch with the detectors from every measurement round drawn on top of one another, producing a dense overlay of red and blue tiles.',
+    caption:
+      'Figure 2. Every round at once. Figure 1 is a single slice in time; this is all of them overlaid. A decoder never sees one clean snapshot — it sees this, a stack of rounds in which the measurements are themselves faulty, and has to work out which of the lit checks are real.',
+    width: 3981,
+    height: 3981,
+  },
+  {
+    src: '/work/qec/fig-3-architecture.svg',
     alt: 'PLACEHOLDER — a block diagram of the decoder network, from syndrome input through recurrent and convolutional stages to a logical-flip prediction.',
     caption:
-      'Figure 2. Decoder architecture. Syndrome rounds enter as a time series; the network is asked for one bit — whether a logical flip has occurred — not for the physical error pattern, which is unrecoverable in principle.',
+      'Figure 3. Decoder architecture. Syndrome rounds enter as a time series; the network is asked for one bit — whether a logical flip has occurred — not for the physical error pattern, which is unrecoverable in principle.',
     width: 900,
     height: 460,
   },
   {
-    src: '/work/qec/fig-3-logical-error-rate.svg',
+    src: '/work/qec/fig-4-logical-error-rate.svg',
     alt: 'PLACEHOLDER — logical error rate against physical error rate for the learned decoder and for minimum-weight perfect matching, with error bands.',
     caption:
-      'Figure 3. Logical error rate against physical error rate, learned decoder versus minimum-weight perfect matching. Bands are across independent training runs, not a single seed — run-to-run spread on this task is comparable to the effect being measured, so a single curve would not mean anything.',
+      'Figure 4. Logical error rate against physical error rate, learned decoder versus minimum-weight perfect matching. Bands are across independent training runs, not a single seed — run-to-run spread on this task is comparable to the effect being measured, so a single curve would not mean anything.',
     width: 900,
     height: 600,
   },
   {
-    src: '/work/qec/fig-4-failure-cases.svg',
+    src: '/work/qec/fig-5-failure-cases.svg',
     alt: 'PLACEHOLDER — a heat map over the lattice showing where on the code the decoder fails most often.',
     caption:
-      'Figure 4. Where the decoder is wrong. Failures are not spread evenly over the lattice, which is the most useful thing the error analysis produced.',
+      'Figure 5. Where the decoder is wrong. Failures are not spread evenly over the lattice, which is the most useful thing the error analysis produced.',
     width: 900,
     height: 560,
   },
@@ -183,6 +194,18 @@ const FIGURES = [
           conclusions drawn from smaller runs were, repeatedly, artifacts.
         </p>
 
+        <figure class="square-figure">
+          <img
+            src={FIGURES[1].src}
+            alt={FIGURES[1].alt}
+            width={FIGURES[1].width}
+            height={FIGURES[1].height}
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>{FIGURES[1].caption}</figcaption>
+        </figure>
+
         <h3>Model</h3>
         <p>
           This project builds on a recurrent–convolutional (RCNN) decoder
@@ -201,14 +224,14 @@ const FIGURES = [
 
         <figure>
           <img
-            src={FIGURES[1].src}
-            alt={FIGURES[1].alt}
-            width={FIGURES[1].width}
-            height={FIGURES[1].height}
+            src={FIGURES[2].src}
+            alt={FIGURES[2].alt}
+            width={FIGURES[2].width}
+            height={FIGURES[2].height}
             loading="lazy"
             decoding="async"
           />
-          <figcaption>{FIGURES[1].caption}</figcaption>
+          <figcaption>{FIGURES[2].caption}</figcaption>
         </figure>
 
         <h3>Evaluation</h3>
@@ -228,14 +251,14 @@ const FIGURES = [
         <h2>Results</h2>
         <figure>
           <img
-            src={FIGURES[2].src}
-            alt={FIGURES[2].alt}
-            width={FIGURES[2].width}
-            height={FIGURES[2].height}
+            src={FIGURES[3].src}
+            alt={FIGURES[3].alt}
+            width={FIGURES[3].width}
+            height={FIGURES[3].height}
             loading="lazy"
             decoding="async"
           />
-          <figcaption>{FIGURES[2].caption}</figcaption>
+          <figcaption>{FIGURES[3].caption}</figcaption>
         </figure>
 
         <p>
@@ -288,14 +311,14 @@ const FIGURES = [
 
         <figure>
           <img
-            src={FIGURES[3].src}
-            alt={FIGURES[3].alt}
-            width={FIGURES[3].width}
-            height={FIGURES[3].height}
+            src={FIGURES[4].src}
+            alt={FIGURES[4].alt}
+            width={FIGURES[4].width}
+            height={FIGURES[4].height}
             loading="lazy"
             decoding="async"
           />
-          <figcaption>{FIGURES[3].caption}</figcaption>
+          <figcaption>{FIGURES[4].caption}</figcaption>
         </figure>
 
         <p>
