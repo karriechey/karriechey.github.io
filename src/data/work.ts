@@ -2,20 +2,8 @@
  * The four projects listed on /work.
  *
  * Created:      2026-07-26
- * Last updated: 2026-07-26
+ * Last updated: 2026-08-15
  *
- * PLACEHOLDER COPY — Claude wrote this from a one-line brief per project. The
- * owner should correct every `problem` sentence and every link; the dates,
- * venues and outcomes are invented scaffolding, not facts.
- *
- * House rule for the copy: the PROBLEM leads, not the technology.
- * Write "reading handwriting nobody has been able to read since the 1960s",
- * not "semi-supervised learning pipeline". The technology can appear in the
- * `stack` line, where a reader who cares can find it.
- *
- * One project — the QEC decoder — has its own page. The other three are cards.
- * That asymmetry is deliberate and reflects where the time actually went. Do
- * not pad the other three to match it.
  */
 
 export interface WorkLink {
@@ -48,16 +36,16 @@ export interface WorkProject {
 export const PROJECTS: WorkProject[] = [
   {
     title: 'A neural-network decoder for surface-code error correction',
-    context: 'National laboratory quantum computing fellowship · 2025–2026',
+    context: 'Fermi National Accelerator Laboratory · 2026',
     problem:
-      'A quantum computer can tell you that something has gone wrong without ever telling you what went wrong — the measurement that detects an error is deliberately designed not to reveal it — so the machine has to guess the damage from its shadow, fast enough to keep up with itself.',
+      'Quantum error correction reveals that an error occurred without directly revealing the error itself. A decoder must infer the most likely correction from patterns in the syndrome measurements, and do so fast enough to support real-time operation. I study how neural-network decoders perform and scale under circuit-level noise, and how they can be compressed for eventual real-time hardware deployment.',
     stack:
-      'Recurrent and convolutional decoders in TensorFlow/Keras, quantization-aware training, Stim for circuit-level noise simulation, benchmarked against minimum-weight perfect matching.',
-    image: '/work/qec-decoder.svg',
+    'RCNN, GRU, and MLP architectures · knowledge distillation · quantization-aware training · Stim circuit simulation · MWPM benchmarking · hls4ml ',
+    image: '/work/qec-decoder.jpg',
     imageAlt:
-      'PLACEHOLDER — a surface code lattice with a chain of errors and the two stabilizer checks that fire at its endpoints.',
-    width: 800,
-    height: 500,
+      'Left: a dilution refrigerator hanging open in a laboratory, its gold-plated cooling stages and wiring exposed. Right: Karrie Chey speaking at a podium marked University of Chicago Pritzker School of Molecular Engineering.',
+    width: 1010,
+    height: 792,
     href: '/work/qec-decoder',
     links: [
       { label: 'Read the full write-up', href: '/work/qec-decoder' },
