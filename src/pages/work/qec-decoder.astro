@@ -3,12 +3,16 @@
  * The one deep project page: the surface-code decoder.
  *
  * Created:      2026-07-26
- * Last updated: 2026-07-26
+ * Last updated: 2026-08-15
  *
- * PLACEHOLDER COPY. The structure is real — summary, question, method,
- * figures, results, status, links — but the prose was written by Claude from a
- * one-line brief and every number in the results table is a marked placeholder
- * rather than an invented figure. Replace before this is shown to anyone.
+ * The summary, research question, model and status sections now reflect the
+ * real project. Still placeholder: the figures, and every number in the
+ * results table (marked with the literal word PLACEHOLDER rather than an
+ * invented figure — fill them in from the run logs, not from memory).
+ *
+ * ATTRIBUTION, load-bearing: the RCNN architecture was developed by Ulaşcan.
+ * This project evaluates and extends the experimental study around it. Do not
+ * let an edit drift into wording that implies the architecture was built here.
  *
  * Figure files go in /public/work/qec/ — see FIGURES.md in that directory for
  * what belongs in each slot.
@@ -22,12 +26,15 @@ import SurfaceCode from '../../components/SurfaceCode.astro';
  */
 const FIGURES = [
   {
-    src: '/work/qec/fig-1-lattice.svg',
-    alt: 'PLACEHOLDER — a distance-5 surface code lattice with data qubits, X-type and Z-type stabilizer checks marked.',
+    // Exported from the analysis notebooks in FNAL-QCDecoding-FPGA. Square
+    // viewBox (1678 × 1678), so the width/height below must stay equal or the
+    // browser reserves the wrong space and the page jumps as it loads.
+    src: '/work/qec/per-round-detector-slice.svg',
+    alt: 'A surface-code detector slice: a square lattice of coloured plaquettes, red and blue marking the two families of parity check, tiling the patch.',
     caption:
-      'Figure 1. The code being decoded. Data qubits sit at the lattice points; each check measures the parity of its four neighbours. Violet checks catch phase errors, teal checks catch bit-flip errors.',
-    width: 900,
-    height: 560,
+      'Figure 1. The code being decoded, drawn as one round of detectors. Each coloured tile is a parity check over the data qubits at its corners. The two colours are the two families of check — one catches bit-flip errors, the other catches phase errors — and between them they cover the patch without ever measuring the encoded state itself.',
+    width: 1678,
+    height: 1678,
   },
   {
     src: '/work/qec/fig-2-architecture.svg',
@@ -58,17 +65,40 @@ const FIGURES = [
 
 <BaseLayout
   title="A neural-network decoder for surface-code error correction"
-  description="Why a quantum computer can detect an error without learning what it was, and what a learned decoder can do about it that minimum-weight matching cannot."
+  description="Why a quantum computer can detect an error without learning what it was, and an experimental study of how neural decoders behave as architecture, training scale, code configuration and hardware constraints change."
 >
   <div class="shell">
     <article>
       <header class="head">
-        <p class="eyebrow">National laboratory quantum computing fellowship · 2025–2026</p>
+        <p class="eyebrow">Fermi National Accelerator Laboratory · 2026</p>
         <h1 class="measure">A neural-network decoder for surface-code error correction</h1>
       </header>
 
       <div class="prose">
         <h2>Summary</h2>
+
+        {/*
+          Deliberately small and floated rather than a hero image. The page is
+          a research story; a full-width photograph of people would make it
+          read as a profile instead. It sits in the summary because that is
+          where a reader has just learned what the project is, and where
+          saying who it is done with adds context rather than interrupting.
+        */}
+        <figure class="photo-inset">
+          <img
+            src="/work/qec/advisors.jpg"
+            alt="Three people standing together in a laboratory office corridor, all wearing Fermilab lanyards."
+            width="1200"
+            height="897"
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>
+            With my research advisors at Fermilab: Dr. Gabriel Perdue, Senior
+            Scientist, and Dr. Giuseppe Di Guglielmo, Principal Engineer.
+          </figcaption>
+        </figure>
+
         <p>
           A quantum computer cannot look at its own state to see whether it has
           been damaged — looking destroys it. Instead it measures a set of
@@ -82,10 +112,12 @@ const FIGURES = [
         <p>
           The standard answer is minimum-weight perfect matching, which assumes
           the simplest explanation is the right one. It is fast, it is
-          principled, and it is provably not optimal. This project asked how
-          much of that gap a learned decoder can close on realistic
-          circuit-level noise, and — more usefully — where the remaining
-          failures actually are.
+          principled, and it is provably not optimal. Neural decoders can
+          recover some of what matching throws away. This project is an
+          experimental study of when they do: how the advantage responds to
+          model architecture, to how much data the model has seen, to the size
+          of the code being protected, and to the severe constraints of
+          hardware that has to keep pace with the machine it is correcting.
         </p>
 
         <h2>The research question</h2>
@@ -97,12 +129,21 @@ const FIGURES = [
           is where an optimal decoder lives.
         </p>
         <p>
-          So: can a network trained on simulated syndromes learn enough of that
-          structure to beat matching at the same code distance, and does the
-          advantage hold up under noise it was not trained on?
+          So the question is not simply whether a network can beat matching.
+          It is: <strong>how much of the structure matching misses do neural
+          decoders actually capture, and what happens to that as the
+          architecture, the training scale, the code configuration and the
+          hardware budget change?</strong>
+        </p>
+        <p>
+          Those four turn out to pull against each other. A model large enough
+          to learn the structure may be too large to run inside the correction
+          cycle; an advantage measured on a small code at one noise strength
+          may not survive at a larger one. The useful result is not a single
+          number but the shape of those trade-offs.
         </p>
 
-        <figure>
+        <figure class="square-figure">
           <img
             src={FIGURES[0].src}
             alt={FIGURES[0].alt}
@@ -144,11 +185,18 @@ const FIGURES = [
 
         <h3>Model</h3>
         <p>
-          A recurrent stage consumes the rounds in order and a convolutional
-          stage exploits the fact that the lattice is spatially local and the
-          same everywhere. The network predicts one bit — whether a logical
-          flip has occurred — because that is the only question with a
-          well-defined answer.
+          This project builds on a recurrent–convolutional (RCNN) decoder
+          developed by Ulaşcan. The architecture combines a recurrent stage
+          that processes syndrome rounds over time with a convolutional stage
+          that exploits the spatial structure of the surface-code lattice. It
+          predicts one bit — whether a logical flip has occurred — because that
+          is the only question with a well-defined answer.
+        </p>
+        <p>
+          My work focuses on experimentally evaluating that decoder: how its
+          performance scales with training data and code configuration, how it
+          compares with simpler MLP and GRU architectures, and how much it can
+          be compressed for eventual FPGA deployment.
         </p>
 
         <figure>
@@ -215,12 +263,22 @@ const FIGURES = [
               <td>1.00×</td>
             </tr>
             <tr>
-              <td>Learned decoder</td>
+              <td>RCNN</td>
               <td>PLACEHOLDER</td>
               <td>PLACEHOLDER</td>
             </tr>
             <tr>
-              <td>Learned decoder, quantized</td>
+              <td>RCNN, quantized</td>
+              <td>PLACEHOLDER</td>
+              <td>PLACEHOLDER</td>
+            </tr>
+            <tr>
+              <td>GRU</td>
+              <td>PLACEHOLDER</td>
+              <td>PLACEHOLDER</td>
+            </tr>
+            <tr>
+              <td>MLP</td>
               <td>PLACEHOLDER</td>
               <td>PLACEHOLDER</td>
             </tr>
@@ -249,11 +307,17 @@ const FIGURES = [
 
         <h2>Current status</h2>
         <p>
-          Ongoing. The current thread is quantization: a decoder that has to
-          run inside the control loop of a real machine has to fit on an FPGA
-          and finish inside the error-correction cycle, so the interesting
-          question is no longer just accuracy but how much precision can be
-          removed from the weights before accuracy goes with it.
+          Ongoing. I am studying the trade-offs among decoder accuracy, model
+          architecture, parameter count and deployment cost. That includes
+          comparisons among RCNN, GRU and MLP models, model compression and
+          quantization, and tests of how performance changes as the
+          surface-code distance and the number of syndrome rounds increase.
+        </p>
+        <p>
+          The constraint underneath all of it: a decoder that runs in the
+          control loop of a real machine has to fit on an FPGA and finish
+          inside the error-correction cycle. Accuracy that arrives too late is
+          not accuracy.
         </p>
 
         <h2>Links</h2>
@@ -290,6 +354,46 @@ const FIGURES = [
      that dwarfs everything around it. It keeps its own max-width. */
   .prose :global(figure:not(.lattice-figure)) {
     max-width: min(100%, 52rem);
+  }
+
+  /* The detector slice is square. At the 52rem figure width above it would be
+     an 832px cube dominating the page, so it gets its own narrower cap —
+     wide-figure rules are written for charts and block diagrams, which are
+     landscape. */
+  .prose :global(.square-figure) {
+    max-width: min(100%, 34rem);
+  }
+
+  /* The advisor photograph. Small on purpose — it is context, not a subject.
+     Overrides the 52rem figure rule above, which exists for lattice diagrams
+     and would blow a snapshot of three people up to five times this size.
+     Floated so the prose closes around it and it reads as a margin note. */
+  .prose :global(.photo-inset) {
+    max-width: 19rem;
+    float: right;
+    margin: 0.35rem 0 var(--space-2) var(--space-3);
+  }
+
+  /* Stops a section heading from wrapping into the narrow gutter beside the
+     photo if the summary prose runs shorter than the image is tall. */
+  .prose :global(h2) {
+    clear: right;
+  }
+
+  .prose :global(.photo-inset img) {
+    width: 100%;
+    height: auto;
+    border-radius: 3px;
+  }
+
+  /* Below the float threshold the photo becomes a normal block. A 19rem float
+     inside a 360px column leaves a two-word-wide gutter of text beside it. */
+  @media (max-width: 700px) {
+    .prose :global(.photo-inset) {
+      float: none;
+      max-width: 100%;
+      margin: var(--space-3) 0;
+    }
   }
 
   .back-link {
