@@ -77,6 +77,76 @@ const FIGURES = [
     height: 560,
   },
 ];
+
+/**
+ * The run table.
+ *
+ * Transcribed verbatim from the run log — every value is a string rather than
+ * a number so nothing is reformatted, rounded or locale-shifted on the way to
+ * the page. If a figure here disagrees with a figure in a plot, the log is
+ * the authority and both should be corrected, not reconciled by hand.
+ *
+ * `highlight` marks a headline run. In the source table these were picked out
+ * with bold on individual cells; a whole-row tint reads better in a table this
+ * wide, where scattered bold looks like damage rather than emphasis.
+ *
+ * `footnote` refers to the FOOTNOTES list below.
+ */
+interface Run {
+  d: string;
+  model: string;
+  params: string;
+  batch: string;
+  shots: string;
+  seeds: string;
+  pL: string;
+  mwpm: string;
+  ratio: string;
+  perEpoch: string;
+  total: string;
+  hardware: string;
+  date: string;
+  highlight?: boolean;
+  footnote?: number;
+}
+
+const RUNS: Run[] = [
+  { d: '5', model: 'GRU units=140', params: '69,441', batch: '10,000', shots: '10M', seeds: '3', pL: '0.008565 ± 0.000191', mwpm: '0.007571', ratio: '1.13', perEpoch: '8', total: '27 min', hardware: 'grace1 GH200', date: '08-19' },
+  { d: '5', model: 'GRU units=140', params: '69,441', batch: '10,000', shots: '15M', seeds: '3', pL: '0.007512 ± 0.000025', mwpm: '0.007571', ratio: '0.99', perEpoch: '17–18', total: '~58 min', hardware: 'grace1 GH200', date: '08-21' },
+  { d: '5', model: 'GRU units=140', params: '69,441', batch: '10,000', shots: '20M aug', seeds: '3', pL: '0.007167 ± 0.000070', mwpm: '0.007571', ratio: '0.95', perEpoch: '16–17', total: '~55 min', hardware: 'grace1 GH200', date: '08-21', highlight: true },
+  { d: '5', model: 'GRU units=140, sealed', params: '69,441', batch: '10,000', shots: '20M aug', seeds: '3', pL: '0.007141 ± 0.000083', mwpm: '0.007501', ratio: '0.95', perEpoch: '—', total: '—', hardware: 'grace1 GH200', date: '08-21', highlight: true },
+  { d: '5', model: 'GRU units=200', params: '135,201', batch: '10,000', shots: '10M', seeds: '1', pL: '0.008579', mwpm: '0.007571', ratio: '1.13', perEpoch: '16', total: '53 min', hardware: 'grace1 GH200', date: '08-21' },
+  { d: '5', model: 'GRU units=280', params: '256,481', batch: '10,000', shots: '10M', seeds: '1', pL: '0.008975', mwpm: '0.007571', ratio: '1.19', perEpoch: '16', total: '53 min', hardware: 'grace1 GH200', date: '08-21' },
+  { d: '5', model: 'MLP (209,209)', params: '69,389', batch: '10,000', shots: '10M', seeds: '3', pL: '0.010509 ± 0.000071', mwpm: '0.007571', ratio: '1.39', perEpoch: '2', total: '7 min', hardware: 'grace1 GH200', date: '08-19' },
+  { d: '5', model: 'RCNN', params: '69,485', batch: '5,000', shots: '10M', seeds: '1', pL: '0.008905', mwpm: '0.007572', ratio: '1.18', perEpoch: '697', total: '6.6 h', hardware: 'EAF A100 40 GB MIG', date: '08-14' },
+  { d: '5', model: 'RCNN', params: '69,485', batch: '5,000', shots: '15M s0', seeds: '1', pL: '0.011419', mwpm: '0.007572', ratio: '1.51', perEpoch: '1,050', total: '12.0 h', hardware: 'EAF A100 40 GB MIG', date: '08-14' },
+  { d: '5', model: 'RCNN', params: '69,485', batch: '5,000', shots: '15M s1', seeds: '1', pL: '0.010776', mwpm: '0.007572', ratio: '1.42', perEpoch: '1,050', total: '11.4 h', hardware: 'EAF A100 40 GB MIG', date: '08-14' },
+  { d: '7', model: 'GRU units=140', params: '79,521', batch: '10,000', shots: '2M', seeds: '3', pL: '0.041780 ± 0.002883', mwpm: '0.004291', ratio: '9.74', perEpoch: '5', total: '17 min', hardware: 'grace1 GH200', date: '08-20' },
+  { d: '7', model: 'GRU units=140', params: '79,521', batch: '10,000', shots: '5M', seeds: '3', pL: '0.022014 ± 0.001207', mwpm: '0.004291', ratio: '5.13', perEpoch: '5', total: '17 min', hardware: 'grace1 GH200', date: '08-20' },
+  { d: '7', model: 'GRU units=140', params: '79,521', batch: '10,000', shots: '10M', seeds: '3', pL: '0.012324 ± 0.000447', mwpm: '0.004291', ratio: '2.87', perEpoch: '11', total: '37 min', hardware: 'grace1 GH200', date: '08-19' },
+  { d: '7', model: 'GRU units=140', params: '79,521', batch: '10,000', shots: '15M', seeds: '3', pL: '0.009883 ± 0.001088', mwpm: '0.004291', ratio: '2.30', perEpoch: '12–18', total: '40–60 min', hardware: 'grace1 GH200', date: '08-21', highlight: true },
+  { d: '7', model: 'GRU units=140', params: '79,521', batch: '10,000', shots: '20M aug', seeds: '2', pL: '0.009045 ± 0.000921', mwpm: '0.004291', ratio: '2.11', perEpoch: '15', total: '50 min', hardware: 'grace1 GH200', date: '08-21', highlight: true },
+  { d: '7', model: 'GRU units=280', params: '276,641', batch: '10,000', shots: '10M', seeds: '1', pL: '0.013338', mwpm: '0.004291', ratio: '3.11', perEpoch: '8', total: '27 min', hardware: 'grace1 GH200', date: '08-20' },
+  { d: '7', model: 'MLP (160,160)', params: '79,841', batch: '10,000', shots: '10M', seeds: '3', pL: '0.041561 ± 0.004435', mwpm: '0.004291', ratio: '9.69', perEpoch: '4–6', total: '~17 min', hardware: 'grace1 GH200', date: '08-19' },
+  { d: '9', model: 'GRU units=140', params: '92,961', batch: '10,000', shots: '10M', seeds: '3', pL: '0.028793 ± 0.001338', mwpm: '0.002267', ratio: '12.70', perEpoch: '9–11', total: '~35 min', hardware: 'grace1 GH200', date: '08-19/20' },
+  { d: '9', model: 'GRU units=140', params: '92,961', batch: '10,000', shots: '15M', seeds: '1', pL: '0.030758', mwpm: '0.002267', ratio: '13.57', perEpoch: '16', total: '53 min', hardware: 'grace1 GH200', date: '08-21', footnote: 1 },
+  { d: '9', model: 'GRU units=140, LR 1e-3', params: '92,961', batch: '10,000', shots: '10M', seeds: '1', pL: '0.029258', mwpm: '0.002267', ratio: '12.90', perEpoch: '8', total: '28 min', hardware: 'grace1 GH200', date: '08-21', footnote: 2 },
+  { d: '9', model: 'GRU units=140, LR 1e-3', params: '92,961', batch: '10,000', shots: '15M', seeds: '1', pL: '0.027671', mwpm: '0.002267', ratio: '12.20', perEpoch: '12', total: '53 min', hardware: 'grace1 GH200', date: '08-21', footnote: 2 },
+  { d: '9', model: 'GRU units=280', params: '303,521', batch: '10,000', shots: '10M', seeds: '3', pL: '0.024116 ± 0.000919', mwpm: '0.002267', ratio: '10.64', perEpoch: '11 alone, 31 shared', total: '37 min alone', hardware: 'grace1 GH200', date: '08-20/21', highlight: true },
+  { d: '9', model: 'RCNN', params: '76,117', batch: '5,000', shots: '10M', seeds: '1', pL: '0.074773', mwpm: '0.002303', ratio: '32.46', perEpoch: '8,650', total: '101 h', hardware: 'EAF A100 40 GB MIG', date: '08-14' },
+  { d: '9', model: 'RCNN, slow LR (Exp 15)', params: '76,117', batch: '5,000', shots: '10M', seeds: '1', pL: 'running, epoch 10/50', mwpm: '0.002303', ratio: '—', perEpoch: '8,900', total: '~124 h projected', hardware: 'EAF A100 40 GB MIG', date: '08-20 →' },
+  { d: '9', model: 'RCNN (throughput probe)', params: '76,117', batch: '10,000', shots: '10M', seeds: '—', pL: 'not trained', mwpm: '—', ratio: '—', perEpoch: '4,310', total: '—', hardware: 'EAF A100 40 GB MIG', date: '08-18' },
+];
+
+/**
+ * PLACEHOLDER. The source table carried footnote markers ¹ and ² with no
+ * accompanying text. These say what a reader can already see; replace them
+ * with what actually distinguished those runs.
+ */
+const FOOTNOTES = [
+  'PLACEHOLDER — what distinguished this run. The marker was in the source table without a definition.',
+  'PLACEHOLDER — what the reduced learning rate was testing, and why it was tried at this distance.',
+];
 ---
 
 <BaseLayout
@@ -286,52 +356,69 @@ const FIGURES = [
         </figure>
 
         <p>
-          <strong>The numbers below are placeholders.</strong> They are left
-          deliberately un-invented — fill them in from the run logs rather than
-          from memory.
+          Every training run to date, at each code distance. The column that
+          matters is <strong>×MWPM</strong> — the logical error rate as a
+          multiple of what minimum-weight matching achieves on the same shots.
+          Below 1.00 the decoder is doing better than matching; above it, worse.
+          Where a run was repeated across seeds the spread is given, because
+          run-to-run variation on this task is large enough to be mistaken for
+          a result.
         </p>
 
         {/* The rehype plugin that wraps tables only runs over Markdown, so a
             table written directly in a .astro page needs the scroll container
-            added by hand. */}
+            added by hand. This one is thirteen columns wide and will scroll
+            sideways on almost any screen — that is intended. Dropping columns
+            to make it fit would make it a summary rather than a record. */}
         <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Decoder</th>
-              <th>Logical error rate</th>
-              <th>Relative to matching</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Minimum-weight matching</td>
-              <td>PLACEHOLDER</td>
-              <td>1.00×</td>
-            </tr>
-            <tr>
-              <td>RCNN</td>
-              <td>PLACEHOLDER</td>
-              <td>PLACEHOLDER</td>
-            </tr>
-            <tr>
-              <td>RCNN, quantized</td>
-              <td>PLACEHOLDER</td>
-              <td>PLACEHOLDER</td>
-            </tr>
-            <tr>
-              <td>GRU</td>
-              <td>PLACEHOLDER</td>
-              <td>PLACEHOLDER</td>
-            </tr>
-            <tr>
-              <td>MLP</td>
-              <td>PLACEHOLDER</td>
-              <td>PLACEHOLDER</td>
-            </tr>
-          </tbody>
-        </table>
+          <table class="runs">
+            <thead>
+              <tr>
+                <th scope="col" class="num">d</th>
+                <th scope="col">Model</th>
+                <th scope="col" class="num">Params</th>
+                <th scope="col" class="num">Batch</th>
+                <th scope="col">Shots</th>
+                <th scope="col" class="num">Seeds</th>
+                <th scope="col">p<sub>L</sub></th>
+                <th scope="col" class="num">MWPM p<sub>L</sub></th>
+                <th scope="col" class="num">×MWPM</th>
+                <th scope="col" class="num">s/epoch</th>
+                <th scope="col" class="num">Total (1 seed)</th>
+                <th scope="col">Hardware</th>
+                <th scope="col">Completed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {RUNS.map((run) => (
+                <tr class={run.highlight ? 'is-headline' : undefined}>
+                  <td class="num">{run.d}</td>
+                  <td>
+                    {run.model}
+                    {run.footnote && (
+                      <sup class="fn-marker">{run.footnote}</sup>
+                    )}
+                  </td>
+                  <td class="num">{run.params}</td>
+                  <td class="num">{run.batch}</td>
+                  <td>{run.shots}</td>
+                  <td class="num">{run.seeds}</td>
+                  <td class="num">{run.pL}</td>
+                  <td class="num">{run.mwpm}</td>
+                  <td class="num">{run.ratio}</td>
+                  <td class="num">{run.perEpoch}</td>
+                  <td class="num">{run.total}</td>
+                  <td>{run.hardware}</td>
+                  <td>{run.date}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+
+        <ol class="footnotes meta">
+          {FOOTNOTES.map((note) => <li>{note}</li>)}
+        </ol>
 
         <figure>
           <img
@@ -471,6 +558,55 @@ const FIGURES = [
       max-width: 100%;
       margin: var(--space-3) 0;
     }
+  }
+
+  /* ---------------------------------------------------------------------
+     The run table
+
+     Thirteen columns of dense numeric data. Set smaller than body text and in
+     the mono face, because this is a record to be scanned and compared, not
+     prose to be read.
+     --------------------------------------------------------------------- */
+
+  .runs {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    /* Digits share one advance width, so decimal points line up down a column
+       and two error rates can be compared by eye without reading them. */
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .runs :global(.num) {
+    text-align: right;
+  }
+
+  /* Headline runs. A tint rather than bold: at this density bold on scattered
+     cells reads as damage, and the point is that the whole row matters. */
+  .runs :global(tr.is-headline) {
+    background: var(--raised);
+  }
+
+  .runs :global(tr.is-headline td) {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .fn-marker {
+    font-size: 0.7em;
+    color: var(--ink-faint);
+    margin-left: 0.15em;
+  }
+
+  .footnotes {
+    margin-top: var(--space-2);
+    padding-left: 1.2rem;
+    color: var(--ink-soft);
+    font-size: 0.8rem;
+  }
+
+  .footnotes :global(li) + :global(li) {
+    margin-top: 0.35rem;
   }
 
   /* The play control sits between the plot and its caption, in the same mono
