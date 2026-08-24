@@ -56,12 +56,17 @@ const FIGURES = [
     height: 460,
   },
   {
-    src: '/work/qec/fig-4-logical-error-rate.svg',
-    alt: 'PLACEHOLDER — logical error rate against physical error rate for the learned decoder and for minimum-weight perfect matching, with error bands.',
+    // Animated. `src` is the still final frame, extracted from the GIF with
+    // ImageMagick (`-coalesce` first — the GIF stores frame deltas, so pulling
+    // a frame without coalescing gives a fragment, not the composed plot).
+    // The animation is opt-in; see the play button in the markup below.
+    src: '/work/qec/exp16-training-final.png',
+    animated: '/work/qec/exp16-training.gif',
+    alt: 'Two plots side by side. Left: validation loss against training epoch for 49 runs, one line per seed, coloured by code distance 5, 7 and 9. Right: logical error rate against training set size for the GRU decoder at each distance, with a dashed minimum-weight matching baseline for each.',
     caption:
-      'Figure 4. Logical error rate against physical error rate, learned decoder versus minimum-weight perfect matching. Bands are across independent training runs, not a single seed — run-to-run spread on this task is comparable to the effect being measured, so a single curve would not mean anything.',
-    width: 900,
-    height: 600,
+      'Figure 4. Experiment 16 — 49 training runs at physical error rate p = 0.004, with the number of syndrome rounds equal to the code distance. Left: validation loss for every run, one line per seed. Right: logical error rate against training set size for a 140-unit GRU, scored on a held-out block, with minimum-weight matching drawn as a dashed line at each distance. The still shows the final state; the animation replays training epoch by epoch.',
+    width: 1500,
+    height: 640,
   },
   {
     src: '/work/qec/fig-5-failure-cases.svg',
@@ -249,8 +254,20 @@ const FIGURES = [
         </p>
 
         <h2>Results</h2>
-        <figure>
+
+        {/*
+          The animation does not autoplay. An animated GIF cannot be paused by
+          the reader and ignores prefers-reduced-motion entirely — there is no
+          CSS or markup that stops it. Showing the final frame and letting the
+          reader ask for the animation is the only way to respect that setting
+          with this format, and it also spares everyone a 1.2 MB download they
+          did not ask for.
+        */}
+        <figure class="anim-figure">
           <img
+            data-anim-image
+            data-still={FIGURES[3].src}
+            data-animated={FIGURES[3].animated}
             src={FIGURES[3].src}
             alt={FIGURES[3].alt}
             width={FIGURES[3].width}
@@ -258,6 +275,13 @@ const FIGURES = [
             loading="lazy"
             decoding="async"
           />
+          <div class="anim-figure__bar">
+            {/* Hidden until the script runs: without JavaScript the button
+                would do nothing, and a dead control is worse than none. */}
+            <button type="button" class="anim-figure__button" data-anim-toggle hidden>
+              Play training animation
+            </button>
+          </div>
           <figcaption>{FIGURES[3].caption}</figcaption>
         </figure>
 
@@ -364,6 +388,36 @@ const FIGURES = [
   </div>
 </BaseLayout>
 
+<script>
+  /*
+   * Opt-in playback for the training animation.
+   *
+   * Swaps the still frame for the GIF and back. Restarting a GIF from its
+   * first frame is not possible through the DOM — the browser caches it and
+   * resumes mid-loop — so each play appends a cache-busting query string,
+   * which forces a fresh decode from frame one.
+   *
+   * The button starts hidden in the markup and is revealed here, so a reader
+   * without JavaScript sees the still figure and no dead control.
+   */
+  const image = document.querySelector<HTMLImageElement>('[data-anim-image]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-anim-toggle]');
+
+  if (image && toggle) {
+    const still = image.dataset.still ?? '';
+    const animated = image.dataset.animated ?? '';
+    let playing = false;
+
+    toggle.hidden = false;
+
+    toggle.addEventListener('click', () => {
+      playing = !playing;
+      image.src = playing ? `${animated}?t=${Date.now()}` : still;
+      toggle.textContent = playing ? 'Show final frame' : 'Play training animation';
+    });
+  }
+</script>
+
 <style>
   .head {
     margin-bottom: var(--space-3);
@@ -417,6 +471,30 @@ const FIGURES = [
       max-width: 100%;
       margin: var(--space-3) 0;
     }
+  }
+
+  /* The play control sits between the plot and its caption, in the same mono
+     metadata voice as dates and tags rather than as a styled call to action. */
+  .anim-figure__bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-1);
+  }
+
+  .anim-figure__button {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    background: none;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+  }
+
+  .anim-figure__button:hover {
+    color: var(--ink);
   }
 
   .back-link {
