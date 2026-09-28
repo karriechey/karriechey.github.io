@@ -3,7 +3,7 @@
  * Table of contents for a guide article.
  *
  * Created:      2026-07-26
- * Last updated: 2026-07-26
+ * Last updated: 2026-09-28
  *
  * Renders two markups from the same data:
  *   - a sticky column, shown at viewports >= 1024px, with the current section
@@ -11,6 +11,11 @@
  *   - a collapsed <details> block at the top of the article below 1024px,
  *     where there is no room for a second column.
  * CSS decides which one is visible; only one is ever displayed at a time.
+ *
+ * The layout places this component twice: once at the top of the article and
+ * once in the side column. `variant` picks which markup each placement emits.
+ * Without it, both placements emitted both markups, and at >= 1024px the
+ * sticky copy inside the article column floated over the text while scrolling.
  *
  * Guides are 3,000+ word reference documents that people reach from search and
  * read one section of. The TOC is the primary navigation for that reader, not
@@ -22,15 +27,21 @@ import type { MarkdownHeading } from 'astro';
 interface Props {
   /** Headings from `render()`. Filtered to depth 2 and 3 by the caller. */
   headings: MarkdownHeading[];
+  /**
+   * 'inline': only the collapsed <details> block (top of the article).
+   * 'aside': only the sticky column (side column at >= 1024px).
+   */
+  variant: 'inline' | 'aside';
 }
 
-const { headings } = Astro.props;
+const { headings, variant } = Astro.props;
 ---
 
 {
   headings.length > 0 && (
     <>
       {/* --- Narrow viewports: collapsed block at the top of the article --- */}
+      {variant === 'inline' && (
       <details class="toc-details">
         <summary>Contents</summary>
         <nav aria-label="Table of contents">
@@ -43,8 +54,10 @@ const { headings } = Astro.props;
           </ol>
         </nav>
       </details>
+      )}
 
       {/* --- Wide viewports: sticky column ------------------------------- */}
+      {variant === 'aside' && (
       <nav class="toc" aria-label="Table of contents" data-toc>
         <p class="eyebrow">Contents</p>
         <ol>
@@ -55,6 +68,7 @@ const { headings } = Astro.props;
           ))}
         </ol>
       </nav>
+      )}
     </>
   )
 }

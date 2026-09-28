@@ -3,7 +3,7 @@
  * Article layout for a single guide.
  *
  * Created:      2026-07-26
- * Last updated: 2026-07-26
+ * Last updated: 2026-09-28
  *
  * Two-column at >= 1024px: article on the left at a 68ch measure, sticky table
  * of contents on the right. Single column below that, with the TOC collapsed
@@ -51,7 +51,7 @@ const correctionsHref = `mailto:${SITE.email}?subject=${encodeURIComponent(`Corr
 
       {/* Renders as a <details> block here on narrow viewports; the sticky
           copy in the aside below takes over at >= 1024px. */}
-      <TableOfContents headings={tocHeadings} />
+      <TableOfContents headings={tocHeadings} variant="inline" />
 
       <div class="prose">
         <slot />
@@ -66,7 +66,7 @@ const correctionsHref = `mailto:${SITE.email}?subject=${encodeURIComponent(`Corr
     </article>
 
     <aside class="guide__aside">
-      <TableOfContents headings={tocHeadings} />
+      <TableOfContents headings={tocHeadings} variant="aside" />
     </aside>
   </div>
 </BaseLayout>
