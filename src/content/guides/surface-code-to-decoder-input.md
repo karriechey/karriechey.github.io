@@ -3,7 +3,7 @@ title: From surface-code circuit to decoder input
 summary: How the qubits, gates, noise and readout of a d = 5 rotated surface code become the input tensors of four neural decoders (MLP, GRU, Mamba, RCNN).
 date: 2026-09-28
 tags: [quantum error correction, machine learning]
-draft: true
+draft: false
 ---
 
 Every number on this page is for one setting: a rotated surface code at
