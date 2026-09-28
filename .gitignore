@@ -20,3 +20,6 @@ pnpm-debug.log*
 .vscode/
 .idea/
 *.swp
+
+# Local reference material, not published
+scratch/
